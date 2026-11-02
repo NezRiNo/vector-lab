@@ -1,0 +1,672 @@
+<!doctype html>
+<html lang="ru"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<title>Векторная лаборатория</title>
+<style>
+:root{--bg:#fbfaf7;--fg:#1f1e1b;--mut:#6f6d66;--bd:#d9d7cf;--card:#f1efe9;--ac:#3C3489;--grid:#e6e4dc;color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#1c1c1a;--fg:#ecebe4;--mut:#a09e95;--bd:#3b3a36;--card:#272725;--ac:#AFA9EC;--grid:#2f2e2b;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#1c1c1a;--fg:#ecebe4;--mut:#a09e95;--bd:#3b3a36;--card:#272725;--ac:#AFA9EC;--grid:#2f2e2b;color-scheme:dark}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:14px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif}
+.app{display:grid;gap:14px;padding:12px;max-width:1240px;margin:0 auto}
+@media(min-width:900px){.app{grid-template-columns:minmax(0,1.35fr) minmax(340px,1fr);align-items:start}}
+h1{font-size:18px;margin:0 0 8px}h2{font-size:14px;margin:0 0 8px}
+section,.ctl{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:12px;margin-bottom:12px}
+.cvw{height:min(62vh,560px);min-height:340px;border:1px solid var(--bd);border-radius:12px;background:var(--bg);margin:8px 0;overflow:hidden}
+canvas{width:100%;height:100%;display:block;touch-action:none;cursor:grab}
+button,select,input:not([type=range]):not([type=checkbox]){font:inherit;color:var(--fg);background:var(--bg);border:1px solid var(--bd);border-radius:8px;padding:5px 9px}
+button{cursor:pointer}button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--ac);outline-offset:1px}
+.on{background:var(--ac);color:var(--bg);border-color:var(--ac)}
+.seg{display:flex;gap:6px}.tabs{display:flex;flex-wrap:wrap;gap:6px;align-items:center;padding:12px 12px 0;max-width:1240px;margin:0 auto}.tabs b{margin-right:8px}
+.row{display:grid;grid-template-columns:12px 44px repeat(3,minmax(0,1fr)) 52px 26px;gap:5px;align-items:center;margin-bottom:5px}
+.row i{width:12px;height:12px;border-radius:50%}
+.row input{width:100%;padding:4px 6px}.ro{opacity:.7}
+.row.h{color:var(--mut);font-size:12px;margin:0}
+.ln{font-size:12px;color:var(--mut)}.sr{display:grid;grid-template-columns:96px 1fr 40px;gap:8px;align-items:center;margin-bottom:4px}
+.btns,.chk,.f{display:flex;flex-wrap:wrap;gap:6px 12px;align-items:center;margin-top:8px}
+label{display:flex;gap:6px;align-items:center}
+.ctl label:has(input[type=range]){margin-bottom:4px}.ctl input[type=range]{flex:1}
+#out div{margin:3px 0}.hint{color:var(--mut);font-size:12px;margin:8px 0 0}table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}td,th{padding:2px 8px;text-align:right;border-bottom:1px solid var(--bd)}
+.kb{position:fixed;right:12px;bottom:calc(64px + env(safe-area-inset-bottom,0px));width:min(420px,calc(100vw - 24px));max-height:60vh;overflow:auto;background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:10px;z-index:20;display:none;box-shadow:0 4px 18px rgba(0,0,0,.2)}
+.kg{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-bottom:6px}.kg button{padding:8px 0;min-width:0}#kbt{position:fixed;right:12px;bottom:calc(12px + env(safe-area-inset-bottom,0px));z-index:21;padding:10px 14px}.fm{margin:2px 0 6px}
+.rv{display:block;margin-top:4px;padding:8px 10px;background:var(--card);border:1px solid var(--bd);border-radius:10px;text-align:center;font-size:1.3em;color:var(--fg);font-family:"Latin Modern Math","STIX Two Math","Cambria Math",Cambria,"Times New Roman",serif;overflow-x:auto}
+.fr{display:inline-flex;flex-direction:column;vertical-align:middle;text-align:center;margin:0 3px;font-size:.95em}.fr>span{padding:0 4px;line-height:1.25}.fr>span:first-child{border-bottom:1.5px solid currentColor}.sq .ov{border-top:1.5px solid currentColor;padding:0 2px}
+.mx{display:inline-block;position:relative;padding:3px .8em;margin:4px 6px;vertical-align:middle;font-family:"Latin Modern Math","STIX Two Math","Cambria Math",Cambria,"Times New Roman",serif;font-size:1.1em}
+.mx::before,.mx::after{content:"";position:absolute;top:0;bottom:0;width:.5em;border:0 solid currentColor}
+.mx::before{left:0;border-left-width:2px;border-radius:60% 0 0 60%/50% 0 0 50%}.mx::after{right:0;border-right-width:2px;border-radius:0 60% 60% 0/0 50% 50% 0}
+.mx.dt::before,.mx.dt::after{border-radius:0;width:0}.mx.dt{padding:3px .5em}
+.mx table{border-collapse:collapse;width:auto;margin:0}.mx td{border:0;padding:1px .55em;text-align:center;font-variant-numeric:tabular-nums}.mx td sub{font-size:.7em}
+.mx input{border:0;border-bottom:1px dashed var(--bd);border-radius:0;background:transparent;font:inherit;width:60px;text-align:center;padding:2px}
+</style></head><body>
+<nav class="tabs"><b>Вышмат-лаборатория</b><button id="g1" class="on">Линейная алгебра</button><button id="g2">Математический анализ</button><button id="g3">Решатель</button></nav>
+<nav class="tabs" id="sub1"><button id="t1" class="on">Векторы</button><button id="t5">Комплексные числа</button><button id="t6">Матрицы</button></nav>
+<nav class="tabs" id="sub2" style="display:none"><button id="t4">Производные</button><button id="t3">Пределы</button><button id="t2">Интегралы</button><button id="t7" style="display:none"></button></nav>
+<div id="vbox" class="tabs" style="display:none;padding-top:8px"><b style="margin-right:8px">Параметры</b><div id="vl" style="display:flex;flex-wrap:wrap;gap:4px 16px"></div><button id="va" style="display:none"></button></div>
+<div class="app" id="tabV">
+<div class="left">
+<h1>Векторная лаборатория</h1>
+<div class="seg"><button id="m2">2D</button><button id="m3" class="on">3D</button></div>
+<div class="cvw"><canvas id="cv"></canvas></div>
+<div class="ctl">
+<label>поворот <input type="range" id="az" min="-180" max="180" step="1" value="-105"></label>
+<label>наклон <input type="range" id="el" min="-90" max="90" step="1" value="28"></label>
+<div class="btns"><button id="fit">Вписать</button><button id="v0">Исходный вид</button><button id="vt">Сверху</button><button id="vn">Смотреть на угол</button></div>
+<div class="chk"><label><input type="checkbox" id="cg" checked> сетка</label><label><input type="checkbox" id="cl" checked> подписи</label><label><input type="checkbox" id="cb"> проекции на оси</label><label><input type="checkbox" id="cp"> проекция u на v</label></div>
+<p class="hint">В 3D тяните по рисунку, чтобы вращать. Колесо мыши меняет масштаб.</p>
+</div></div>
+<div class="right">
+<section><h2>Векторы</h2><div class="f" style="margin:0 0 8px"><label>Пример <select id="ex"><option value="">выбрать…</option><option value="perp">перпендикулярные векторы</option><option value="par">параллельные векторы</option><option value="sum">сумма и разность</option><option value="proj">проекция</option></select></label></div><div id="et" class="hint" style="margin:0 0 8px"></div>
+<div class="row h"><span></span><span>имя</span><span>x</span><span>y</span><span>z</span><span>длина</span><span></span></div>
+<div id="list"></div><div class="f"><button id="add">Добавить вектор</button></div></section>
+<section><h2>Построить новый вектор</h2>
+<div class="f"><select id="op"><option value="add">A + B</option><option value="sub">A − B</option><option value="mul">k · A</option><option value="cross">A × B</option><option value="proj">проекция A на B</option><option value="unit">A / |A|</option></select></div>
+<div class="f"><label>A <select id="oa"></select></label><label id="wb">B <select id="ob"></select></label><label id="wk">k <input id="ok" value="2" size="4"></label><button id="go">Построить</button></div></section>
+<section><h2>Угол и произведения</h2>
+<div class="f" style="margin:0 0 8px"><label>u <select id="su"></select></label><label>v <select id="sv"></select></label></div>
+<div id="out"></div></section><section><h2>Линейная оболочка</h2><p class="hint" style="margin:0 0 8px">Оболочка — все комбинации c₁·a + c₂·b + … Отметьте векторы и двигайте коэффициенты: вектор w не выйдет за пределы оболочки. Кружок слева в таблице векторов переключает вектор и точку.</p><div class="f" style="margin:0 0 8px"><button id="sp">Показать оболочку</button><button id="pm">Все: векторы ↔ точки</button></div><div id="spl"></div><div id="si" style="margin-top:8px"></div></section><section style="display:none"><h2>Тренажёр</h2><div class="f" style="margin:0 0 8px"><button id="pn">Новая задача</button><label><input type="checkbox" id="ph"> скрыть решение</label></div><div id="pt" class="hint" style="margin:0 0 8px">Нажмите «Новая задача», чтобы получить два случайных вектора.</div><div class="f"><label>⟨a, b⟩ = <input id="pa" size="5"></label><label>φ (°) = <input id="pb" size="5"></label><button id="pc">Проверить</button></div><div id="pr" style="margin-top:8px"></div></section><section><h2>Сохранить и загрузить</h2><p class="hint" style="margin:0 0 8px">Экспорт превращает сцену в текст: скопируйте его и сохраните или отправьте другу. Чтобы загрузить, вставьте текст в поле и нажмите «Импорт».</p><textarea id="io" rows="5" style="width:100%;font:12px ui-monospace,monospace;color:var(--fg);background:var(--bg);border:1px solid var(--bd);border-radius:8px;padding:6px"></textarea><div class="f"><button id="xe">Экспорт в текст</button><button id="xi">Импорт из текста</button><button id="xd">Скачать файл</button><label>из файла <input type="file" id="if" accept=".json,.txt"></label></div><div id="im" style="margin-top:8px"></div></section>
+</div></div>
+<div class="app" id="tabI" style="display:none">
+<div class="left"><h1>Интегралы</h1><div class="cvw"><canvas id="ic" style="cursor:default"></canvas></div><p class="hint">Двигайте n: чем больше разбиений, тем меньше погрешность. Синяя область отрицательная, оранжевая считается с минусом. Режим «длина дуги» складывает длины векторов звеньев ломаной.</p></div>
+<div class="right">
+<section><h2>Функция и отрезок</h2>
+<div class="f" style="margin:0 0 8px"><label>Пример <select id="ip"></select></label></div>
+<div class="f"><label>f(x) = <input id="ifx" value="x^2" size="18"></label></div>
+<div class="f"><label>a <input id="ia" value="0" size="5"></label><label>b <input id="ib" value="2" size="5"></label></div>
+<div class="f"><label>метод <select id="imt"><option value="left">левые прямоугольники</option><option value="right">правые прямоугольники</option><option value="mid">средние прямоугольники</option><option value="trap">трапеции</option><option value="simp">Симпсон</option><option value="arc">длина дуги</option></select></label></div>
+<div class="f"><label>n <input type="range" id="in" min="1" max="100" value="8"></label><b id="inv"></b></div>
+<p class="hint">Функция: x^2, sin(x), exp(x), ln(x), sqrt(x), abs(x), pi, 2x. Дроби через /.</p></section>
+<section><h2>Решение</h2><div id="iout"></div></section>
+</div></div>
+<div class="app" id="tabL" style="display:none">
+<div class="left"><h1>Пределы</h1><div class="cvw"><canvas id="lc" style="cursor:default"></canvas></div><p class="hint">Жёлтая полоса — окрестность предела (ε), зелёная — подходящая для неё окрестность точки a (δ): пока x в ней, график остаётся в жёлтой полосе. Уменьшайте ε и смотрите, как сужается δ.</p></div>
+<div class="right">
+<section><h2>Функция и точка</h2>
+<div class="f" style="margin:0 0 8px"><label>Пример <select id="lp"></select></label></div>
+<div class="f"><label>f(x) = <input id="lfx" size="20"></label></div>
+<div class="f"><label>x → <input id="la" size="6"></label><span class="hint" style="margin:0">число, inf или -inf</span></div>
+<div class="f"><label>масштаб <input type="range" id="lh" min="-3" max="2" step="0.1" value="0"></label></div>
+<div class="f"><label>ε <input type="range" id="le" min="-3" max="0.5" step="0.1" value="-0.5"></label><b id="lev"></b></div></section>
+<section><h2>Неопределённости и Лопиталь</h2><div class="f" style="margin:0 0 8px"><label>Теорема <select id="llt"><option value="lop">Правило Лопиталя</option><option value="tay">Формула Тейлора</option><option value="sq">Теорема о сжатии</option></select></label><button id="llb">Применить</button></div><div class="f"><label>для сжатия g ≤ f ≤ h: g <input id="lgx" value="-abs(x)" size="8"></label><label>h <input id="lh2" value="abs(x)" size="8"></label></div><div id="llo"></div></section>
+<section><h2>Ряд Тейлора в точке a</h2><div class="f" style="margin:0 0 8px"><button id="ltb">Разложить в ряд</button><label>порядок n <input type="range" id="lnn" min="0" max="10" value="4"></label><b id="lnv"></b></div><div id="ltx"></div></section>
+<section><h2>Таблица приближения</h2><div id="lout"></div></section>
+</div></div>
+<div class="app" id="tabD" style="display:none">
+<div class="left"><h1>Производные</h1><div class="cvw"><canvas id="dc" style="cursor:default"></canvas></div><p class="hint">Фиолетовый — f, зелёный пунктир — f′, оранжевая прямая — касательная в точке x₀. Серая линия — секущая из теоремы Лагранжа.</p></div>
+<div class="right">
+<section><h2>Функция</h2><div class="f" style="margin:0 0 8px"><label>Пример <select id="dp"></select></label></div><div class="f"><label>f(x) = <input id="dfx" size="20"></label><label><input type="checkbox" id="dim"> неявная</label></div>
+<div class="f"><label>x от <input id="dx0" size="4"></label><label>до <input id="dx1" size="4"></label></div>
+<div class="f"><label>x₀ <input type="range" id="dt" min="-3" max="3" step="0.05" value="1"></label><b id="dtv"></b></div></section>
+<section><h2>Формулы</h2><div class="f" style="margin:0 0 8px"><label>Выбрать формулу <select id="dfm"></select></label><label>порядок <select id="dor"><option>1</option><option>2</option><option>3</option></select></label><label><input type="checkbox" id="dlg"> логарифмировать: u<sup>v</sup> = (e<sup>ln u</sup>)<sup>v</sup> = e<sup>v·ln u</sup></label></div><details><summary>Таблица производных и правила</summary><div class="hint" style="line-height:1.7">(c)′ = 0; (xⁿ)′ = n·xⁿ⁻¹; (eˣ)′ = eˣ; (aˣ)′ = aˣ·ln a; (ln x)′ = 1/x; (sin x)′ = cos x; (cos x)′ = −sin x; (tg x)′ = 1/cos²x; (arcsin x)′ = 1/√(1 − x²); (arctg x)′ = 1/(1 + x²)<br>Правила: (u ± v)′ = u′ ± v′; (cu)′ = c·u′; (uv)′ = u′v + uv′; (u/v)′ = (u′v − uv′)/v²; (f(g))′ = f′(g)·g′</div></details></section>
+<section><h2>Автоматическое решение</h2><div id="dsol" style="max-height:340px;overflow:auto;overflow-wrap:anywhere"></div></section>
+<section><h2>Результат</h2><div id="dout" style="overflow-wrap:anywhere"></div></section>
+<section><h2>Теоремы</h2><p class="hint" style="margin:0 0 8px">Лагранж: найдётся c ∈ (a, b), где f′(c) = (f(b) − f(a))/(b − a). Если f(a) = f(b), это Теорема Ролля: f′(c) = 0. Ферма: в точке экстремума f′ = 0.</p><div class="f" style="margin:0 0 8px"><label>Теорема <select id="dtm"><option value="fermat">Ферма</option><option value="rolle">Ролля</option><option value="lagrange" selected>Лагранжа</option><option value="cauchy">Коши</option></select></label><label>g(x) для Коши <input id="dgx" value="x^2" size="8"></label></div><div class="f"><label>a <input id="da" size="4"></label><label>b <input id="db" size="4"></label><button id="dl">Применить теорему</button></div><div id="dth" style="margin-top:8px"></div></section>
+</div></div>
+<div class="app" id="tabN" style="display:none">
+<div class="left"><h1>Неявная функция</h1><div class="cvw"><canvas id="nc" style="cursor:default"></canvas></div><p class="hint">Кривая F(x, y) = 0. Оранжевая прямая — касательная, зелёная стрелка — градиент (F<sub>x</sub>; F<sub>y</sub>), он перпендикулярен касательной.</p></div>
+<div class="right">
+<section><h2>Уравнение</h2><div class="f" style="margin:0 0 8px"><label>Пример <select id="np"></select></label></div><input id="nq" type="hidden"><div id="nfm" class="hint fm"></div>
+<div class="f"><label>точка x₀ <input id="nx0" size="5"></label><label>y₀ <input id="ny0" size="5"></label></div>
+<div class="f"><label>x от <input id="nxa" size="4"></label><label>до <input id="nxb" size="4"></label><label>y от <input id="nya" size="4"></label><label>до <input id="nyb" size="4"></label></div><p class="hint">Пишите «левая часть = правая» с переменными x и y. Точка притягивается к ближайшей точке кривой.</p></section>
+<section><h2>Решение</h2><div id="nout" style="overflow:auto;overflow-wrap:anywhere"></div></section></div></div>
+<div class="app" id="tabS" style="display:none">
+<div class="left"><h1>Решатель</h1><section><h2>Задача</h2>
+<div class="f"><label>Тема <select id="stp"><option value="lim">Предел</option><option value="der">Производная</option><option value="int">Интеграл</option><option value="mat">Матрица и система</option><option value="vec">Векторы</option><option value="cx">Комплексные числа</option></select></label></div>
+<div class="f" data-t="lim der int"><label>f(x) = <input id="sf" value="x^sin(x)" size="26"></label></div>
+<div class="f" data-t="lim"><label>x → <input id="sa" value="0" size="6"></label><label>способ <select id="sm"><option value="lop">Лопиталь и неопределённости</option><option value="tay">Ряд Тейлора</option></select></label></div>
+<div class="f" data-t="der"><label>порядок <select id="so"><option>1</option><option>2</option><option>3</option></select></label></div>
+<div class="f" data-t="int"><label>от <input id="si1" value="0" size="5"></label><label>до <input id="si2" value="2" size="5"></label><label>метод <select id="sim"></select></label></div>
+<div class="f" data-t="mat"><label>матрица <input id="smx" value="2 1 -1 8; -3 -1 2 -11; -2 1 2 -3" size="34"></label><label>операция <select id="smo"></select></label></div>
+<div class="f" data-t="vec"><label>u <input id="su1" value="1 2 3" size="10"></label><label>v <input id="sv1" value="4 -1 2" size="10"></label></div>
+<div class="f" data-t="cx"><label>z₁ <input id="sz1" value="1 2" size="6"></label><label>z₂ <input id="sz2" value="2 -1" size="6"></label><label>операция <select id="szo"></select></label></div>
+<div class="f"><button id="ssv" class="on">Решить</button></div><div class="hint" id="shn"></div></section></div>
+<div class="right"><section><h2>Визуализация</h2><img id="simg" alt="" style="display:none;width:100%;border:1px solid var(--bd);border-radius:12px;background:var(--bg)"></section><section><h2>Решение</h2><div id="sout" style="overflow:auto;overflow-wrap:anywhere"></div></section></div></div>
+<div class="app" id="tabM" style="display:none">
+<div class="left"><h1>Матрицы</h1><div class="cvw"><canvas id="mc" style="cursor:default"></canvas></div><p class="hint">Геометрия: столбцы матрицы — векторы (для 2 или 3 строк), |det| — площадь или объём, в системе вектор b раскладывается по столбцам: b = x₁a₁ + x₂a₂ + … В 3D тяните мышью. «Карта значений» красит числа и показывает результат операции (Aᵀ, A⁻¹ или ступенчатый вид).</p></div>
+<div class="right">
+<section><h2>Матрица</h2><div class="f"><label>строк <select id="mrr"></select></label><label>столбцов <select id="mcc"></select></label><label>операция <select id="mop"><option value="gauss">Решить систему методом Гаусса</option><option value="cramer">Решить методом Крамера</option><option value="det">Определитель</option><option value="rank">Ранг</option><option value="inv">Обратная матрица</option><option value="tr">Транспонирование</option></select></label><label>вид <select id="mvm"><option value="auto">авто</option><option value="geo">геометрия</option><option value="heat">карта значений</option></select></label></div><div id="mg" style="margin-top:8px;overflow:auto"></div><p class="hint">Для системы последний столбец — свободные члены b. В клетках можно писать числа и дроби, например 1/2.</p></section>
+<section><h2>Решение</h2><div id="mout" style="overflow:auto"></div></section>
+</div></div>
+<div class="app" id="tabC" style="display:none">
+<div class="left"><h1>Комплексные числа</h1><div class="cvw"><canvas id="cc" style="cursor:default"></canvas></div><p class="hint">Число a + bi — это вектор (a; b) на плоскости. Модуль — длина вектора, аргумент — его угол с осью Re. Дуги показывают аргументы.</p></div>
+<div class="right">
+<section><h2>Числа</h2>
+<div class="f"><label>z₁ = <input id="c1a" value="1" size="4"> + <input id="c1b" value="2" size="4"> i</label></div>
+<div class="f"><label>z₂ = <input id="c2a" value="2" size="4"> + <input id="c2b" value="-1" size="4"> i</label></div>
+<div class="f"><label>операция <select id="cop"><option value="add">z₁ + z₂</option><option value="sub">z₁ − z₂</option><option value="mul">z₁ · z₂</option><option value="div">z₁ / z₂</option><option value="conj">сопряжённое z₁</option><option value="pow">z₁ в степени n</option><option value="root">корни n-й степени из z₁</option></select></label></div>
+<div class="f"><label>n <input type="range" id="cn" min="2" max="12" value="3"></label><b id="cnv"></b></div></section>
+<section><h2>Решение</h2><div id="cout"></div></section>
+</div></div>
+<button id="kbt">⌨ Клавиатура</button>
+<div class="kb" id="kb"><p class="hint" style="margin:0 0 8px">Формат: умножение 2*x или 2x, степень x^2, дробь (x+1)/(x-1), функции со скобками: sin(x), sqrt(x). Между двумя буквами нужен знак *: a*x. Кнопки вставляют текст в поле, которое вы выбрали последним. Можно писать и в LaTeX: \\frac{a}{b}, \\sqrt{x}, x^{2}, \\sin, \\pi. Кнопка a/b вставляет шаблон дроби, курсор стоит в числителе, а ниже показано как она выглядит.</p><div class="kg" id="kg1"></div><div class="kg" id="kg2"></div><div class="kg" id="kg3"></div></div>
+<script>
+const $=s=>document.querySelector(s),dot=(a,b)=>a[0]*b[0]+a[1]*b[1]+a[2]*b[2],cr=(a,b)=>[a[1]*b[2]-a[2]*b[1],a[2]*b[0]-a[0]*b[2],a[0]*b[1]-a[1]*b[0]],len=a=>Math.hypot(a[0],a[1],a[2]);
+const COL=['#7F77DD','#1D9E75','#D85A30','#BA7517','#378ADD','#D4537E','#639922','#888780'];
+const f=x=>{x=Math.abs(x)<5e-10?0:x;return String(Math.round(x*1000)/1000).replace('.',',').replace('-','−')},w=x=>x<0?'('+f(x)+')':f(x);
+const p=s=>{const t=String(s).replace(',','.').replace('−','-'),n=Number(t);return t.trim()!==''&&!isNaN(n)?n:(pf(t)||(()=>NaN))(0)},E=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+let dim=3,az=-105,el=28,k=40,W=0,H=0,uid=0,sv={az:-105,el:28};const vs=[];
+const by=id=>vs.find(v=>v.id==id);
+function mk(n,c,op){const v={id:++uid,n,c,op,col:COL[vs.length%COL.length],r:[0,0,0],pt:false,sp:!op,cf:1};vs.push(v);return v}
+function calc(){vs.forEach(v=>{const o=v.op;let r;if(!o)r=v.c.map((c,j)=>{const s=v.ex&&v.ex[j];if(s==null)return c;const y=p(s);return isNaN(y)?c:y});else{const A=by(o.a).r,B=o.b!=null?by(o.b).r:null;
+if(o.t=='add')r=A.map((x,i)=>x+B[i]);else if(o.t=='sub')r=A.map((x,i)=>x-B[i]);else if(o.t=='mul')r=A.map(x=>x*o.k);else if(o.t=='cross')r=cr(A,B);
+else if(o.t=='proj'){const d=dot(B,B)?dot(A,B)/dot(B,B):0;r=B.map(x=>x*d)}else r=A.map(x=>x/(len(A)||1))}
+if(dim==2)r[2]=0;v.r=r})}
+function P(q){const a=az*Math.PI/180,e=el*Math.PI/180,rx=q[0]*Math.cos(a)-q[1]*Math.sin(a),ry=q[0]*Math.sin(a)+q[1]*Math.cos(a);return[W/2+k*rx,H/2-k*(q[2]*Math.cos(e)+ry*Math.sin(e))]}
+function draw(){calc();const cv=$('#cv'),rc=cv.getBoundingClientRect(),d=devicePixelRatio||1;W=rc.width;H=rc.height;if(!W)return;
+cv.width=W*d;cv.height=H*d;const x=cv.getContext('2d');x.setTransform(d,0,0,d,0,0);x.font='13px system-ui,sans-serif';
+const cs=getComputedStyle(document.documentElement),mu=cs.getPropertyValue('--mut'),gr=cs.getPropertyValue('--grid');
+const L=(a,b,c,lw,da)=>{const s=P(a),t=P(b);x.beginPath();x.setLineDash(da||[]);x.strokeStyle=c;x.lineWidth=lw||1;x.moveTo(s[0],s[1]);x.lineTo(t[0],t[1]);x.stroke();x.setLineDash([])};
+const AR=(a,b,c,lw)=>{L(a,b,c,lw);const s=P(a),t=P(b),g=Math.atan2(t[1]-s[1],t[0]-s[0]),z=9;x.beginPath();x.fillStyle=c;x.moveTo(t[0],t[1]);x.lineTo(t[0]-z*Math.cos(g-.4),t[1]-z*Math.sin(g-.4));x.lineTo(t[0]-z*Math.cos(g+.4),t[1]-z*Math.sin(g+.4));x.closePath();x.fill()};
+const T=(q,t,c,dx,dy,al)=>{const s=P(q);x.fillStyle=c;x.textAlign=al||'left';x.fillText(t,s[0]+dx,s[1]+dy)};
+const ext=Math.max(4,...vs.map(v=>Math.max(...v.r.map(Math.abs)))),N=Math.min(20,Math.ceil(ext)+1);
+if($('#cg').checked)for(let i=-N;i<=N;i++){L([i,-N,0],[i,N,0],gr);L([-N,i,0],[N,i,0],gr)}
+[[0,'x'],[1,'y'],[2,'z']].forEach(([j,nm])=>{if(j==2&&dim==2)return;const e1=[0,0,0],e2=[0,0,0],e3=[0,0,0];e1[j]=-N;e2[j]=N;L(e1,[0,0,0],mu);AR([0,0,0],e2,mu,1.2);T(e2,nm,mu,6,4);
+if(k>=14&&$('#cg').checked){const st=k>=30?1:k>=14?2:5;for(let i=-N;i<=N;i+=st){if(!i)continue;const q=[0,0,0];q[j]=i;T(q,f(i),mu,j?-6:0,j?4:14,j?'right':'center')}}});
+vs.forEach(v=>{const o=v.op;if(!o)return;const A=by(o.a),B=o.b!=null?by(o.b):null;
+if(o.t=='add'){L(A.r,v.r,mu,1,[5,4]);L(B.r,v.r,mu,1,[5,4])}else if(o.t=='sub')L(B.r,A.r,mu,1,[5,4]);else if(o.t=='proj')L(A.r,v.r,mu,1,[5,4])});
+if(spOn){const B=basis(vs.filter(v=>v.sp).map(v=>v.r)),r=B.length,Lg=N*1.6,bl='rgba(55,138,221,';
+if(r==1)L(B[0].map(t=>-Lg*t),B[0].map(t=>Lg*t),bl+'.5)',5);
+else if(r>=2&&(dim==2||r==3)){x.fillStyle=bl+'.1)';x.fillRect(0,0,W,H);x.fillStyle=mu;x.textAlign='left';x.fillText(r==3?'оболочка — всё пространство':'оболочка — вся плоскость',10,20)}
+else if(r==2){const e1=B[0],e2=B[1],c=(a,b)=>e1.map((t,i)=>Lg*(a*t+b*e2[i])),q=[c(1,1),c(1,-1),c(-1,-1),c(-1,1)].map(P);x.beginPath();q.forEach((s,i)=>i?x.lineTo(s[0],s[1]):x.moveTo(s[0],s[1]));x.closePath();x.fillStyle=bl+'.16)';x.fill();x.strokeStyle=bl+'.6)';x.lineWidth=1;x.stroke()}}
+if($('#cb').checked)vs.forEach(v=>{const r=v.r,a=[r[0],r[1],0];if(dim==3)L(r,a,v.col+'99',1,[4,3]);L(a,[r[0],0,0],v.col+'99',1,[4,3]);L(a,[0,r[1],0],v.col+'99',1,[4,3])});
+const U=by($('#su').value),V=by($('#sv').value);
+if(U&&V){const u=U.r,v=V.r,nu=len(u),nv=len(v);if(nu>1e-9&&nv>1e-9){const g=Math.acos(Math.max(-1,Math.min(1,dot(u,v)/nu/nv)));
+if(g>1e-4&&Math.PI-g>1e-4){const R=.4*Math.min(nu,nv),a=u.map(t=>t/nu),b=v.map(t=>t/nv),pts=[];
+for(let i=0;i<=24;i++){const t=i/24,s=Math.sin(g),A=Math.sin((1-t)*g)/s,B=Math.sin(t*g)/s;pts.push(P([0,1,2].map(j=>R*(A*a[j]+B*b[j]))))}
+const o=P([0,0,0]);x.beginPath();x.moveTo(o[0],o[1]);pts.forEach(q=>x.lineTo(q[0],q[1]));x.closePath();x.fillStyle='#D85A3028';x.fill();
+x.beginPath();pts.forEach((q,i)=>i?x.lineTo(q[0],q[1]):x.moveTo(q[0],q[1]));x.strokeStyle='#D85A30';x.lineWidth=2;x.stroke();
+const m=Math.sin(g/2)/Math.sin(g);x.font='bold 13px system-ui,sans-serif';if(!$('#ph').checked)T([0,1,2].map(j=>1.5*R*m*(a[j]+b[j])),f(g*180/Math.PI)+'°','#D85A30',0,4,'center');x.font='13px system-ui,sans-serif'}}}
+if($('#cp').checked&&U&&V){const vv=dot(V.r,V.r);if(vv>1e-9){const t=dot(U.r,V.r)/vv,fp=V.r.map(c=>c*t);L(U.r,fp,'#D85A30',1.5,[5,4]);L([0,0,0],fp,'#D85A30',5)}}
+x.font='bold 14px system-ui,sans-serif';
+vs.forEach(v=>{if(v.pt){const s=P(v.r);x.beginPath();x.fillStyle=v.col;x.arc(s[0],s[1],5,0,7);x.fill();if($('#cl').checked)T(v.r,v.n,v.col,8,-8)}else if(len(v.r)>1e-9){AR([0,0,0],v.r,v.col,2.5);if($('#cl').checked)T(v.r,v.n,v.col,8,-6)}});
+if(spOn){const S=vs.filter(v=>v.sp);let acc=[0,0,0];S.forEach(v=>{const nx=acc.map((t,i)=>t+v.cf*v.r[i]);L(acc,nx,v.col,2,[4,3]);acc=nx});if(S.length&&len(acc)>1e-9){AR([0,0,0],acc,'#378ADD',3.5);T(acc,'w','#378ADD',8,-8)}}}
+function rows(){document.querySelectorAll('#list .row').forEach(rw=>{const v=by(rw.dataset.id);if(!v)return;rw.querySelectorAll('.c').forEach((inp,j)=>{inp.style.visibility=(j==2&&dim==2)?'hidden':'';if(v.op)inp.value=f(v.r[j])});rw.querySelector('.ln').textContent=f(len(v.r))})}
+function piF(g){for(let q=1;q<=12;q++){const n=Math.round(g/Math.PI*q);if(Math.abs(g/Math.PI*q-n)<1e-6){if(!n)return'0';const s=n==1?'π':n==-1?'−π':String(n).replace('-','−')+'π';return q==1?s:s+'/'+q}}return''}
+function readout(){const U=by($('#su').value),V=by($('#sv').value),o=$('#out');if(!U||!V){o.innerHTML='';return}
+if($('#ph').checked){o.innerHTML='<div class="hint">Решение скрыто. Снимите галочку «скрыть решение» в тренажёре, чтобы увидеть его.</div>';return}
+const u=U.r,v=V.r,n=dim,d=dot(u,v),uu=dot(u,u),vv=dot(v,v),nu=Math.sqrt(uu),nv=Math.sqrt(vv),a=E(U.n),b=E(V.n);
+const sum=[...Array(n).keys()].map(i=>w(u[i])+'·'+w(v[i])).join(' + ');
+let h=`<div>⟨${a}, ${b}⟩ = ${sum} = <b>${f(d)}</b></div><div>|${a}| = √⟨${a}, ${a}⟩ = √${f(uu)} = ${f(nu)}</div><div>|${b}| = √⟨${b}, ${b}⟩ = √${f(vv)} = ${f(nv)}</div>`;
+if(nu<1e-9||nv<1e-9)h+='<div>Один из векторов нулевой, угол не определён.</div>';
+else{const c=Math.max(-1,Math.min(1,d/nu/nv)),g=Math.acos(c);
+h+=`<div>cos φ = ⟨${a}, ${b}⟩ / (|${a}|·|${b}|) = ${f(d)} / ${f(nu*nv)} = <b>${f(c)}</b></div><div>φ = <b>${f(g*180/Math.PI)}°</b> ≈ ${f(g)} рад${piF(g)?' = '+piF(g):''}</div>`;
+h+='<div>'+(Math.abs(c)<1e-9?`Векторы перпендикулярны: ⟨${a}, ${b}⟩ = 0.`:Math.abs(c)>1-1e-9?'Векторы параллельны ('+(c>0?'сонаправлены':'противонаправлены')+').':c>0?`Угол острый: ⟨${a}, ${b}⟩ &gt; 0.`:`Угол тупой: ⟨${a}, ${b}⟩ &lt; 0.`)+'</div>';
+h+=`<div>пр<sub>${b}</sub> ${a} = ⟨${a}, ${b}⟩ / |${b}| = ${f(d/nv)}; пр<sub>${a}</sub> ${b} = ⟨${a}, ${b}⟩ / |${a}| = ${f(d/nu)}</div>`}
+const cx=n==3?cr(u,v):null,S=n==3?len(cx):Math.abs(u[0]*v[1]-u[1]*v[0]);
+if(n==3)h+=`<div>${a} × ${b} = (${cx.map(f).join('; ')})</div>`;
+h+=`<div>Площадь параллелограмма = ${f(S)}, треугольника = ${f(S/2)}</div>`;o.innerHTML=h}
+function render(){draw();rows();readout();spanInfo()}
+function sels(){['oa','ob','su','sv'].forEach((id,i)=>{const s=$('#'+id),old=s.value;s.innerHTML=vs.map(v=>`<option value="${v.id}">${E(v.n)}</option>`).join('');
+if([...s.options].some(o=>o.value==old))s.value=old;else{const q=vs[Math.min(i%2,vs.length-1)];if(q)s.value=q.id}})}
+function buildList(){$('#list').innerHTML=vs.map(v=>`<div class="row" data-id="${v.id}"><i title="Нажмите: вектор или точка" style="background:${v.pt?'transparent':v.col};border:2px solid ${v.col};cursor:pointer"></i><input class="nm" value="${E(v.n)}">`+[0,1,2].map(j=>`<input class="c${v.op?' ro':''}" data-j="${j}" inputmode="decimal" value="${f(v.op?0:v.c[j])}"${v.op?' readonly':''}>`).join('')+`<span class="ln"></span><button class="x" title="Удалить">×</button></div>`).join('');sels();spanUI();render()}
+function del(id){const s=new Set([+id]);let ch=true;while(ch){ch=false;vs.forEach(v=>{if(v.op&&!s.has(v.id)&&(s.has(v.op.a)||s.has(v.op.b))){s.add(v.id);ch=true}})}
+for(let i=vs.length-1;i>=0;i--)if(s.has(vs[i].id))vs.splice(i,1);buildList()}
+$('#list').addEventListener('input',e=>{const rw=e.target.closest('.row');if(!rw)return;const v=by(rw.dataset.id);if(e.target.classList.contains('c')&&!v.op){const t=p(e.target.value),j=+e.target.dataset.j;(v.ex=v.ex||[])[j]=e.target.value;v.c[j]=isNaN(t)?0:t;render()}});
+$('#list').addEventListener('change',e=>{if(e.target.classList.contains('nm')){by(e.target.closest('.row').dataset.id).n=e.target.value||'?';sels();spanUI();render()}});
+$('#list').addEventListener('click',e=>{if(e.target.classList.contains('x'))del(e.target.closest('.row').dataset.id);else if(e.target.tagName=='I'){const v=by(e.target.closest('.row').dataset.id);v.pt=!v.pt;buildList()}});
+$('#add').onclick=()=>{const L='abcdefghijklmnopqrstuvwxyz',n=[...L].find(c=>!vs.some(v=>v.n==c))||'v'+uid,R=()=>Math.round(Math.random()*6-3);mk(n,[R(),R(),dim==3?R():0]);buildList();ensure()};
+$('#go').onclick=()=>{const t=$('#op').value,A=by($('#oa').value),B=by($('#ob').value),kk=p($('#ok').value);if(!A)return;const nb=t=='mul'||t=='unit';if(!nb&&!B)return;
+const bn=B?B.n:'',nms={add:A.n+'+'+bn,sub:A.n+'−'+bn,mul:f(isNaN(kk)?1:kk)+A.n,cross:A.n+'×'+bn,proj:'пр_'+bn+' '+A.n,unit:A.n+'⁰'};
+mk(nms[t],[0,0,0],{t,a:A.id,b:nb?null:B.id,k:isNaN(kk)?1:kk});buildList();ensure()};
+function ensure(){calc();const m=Math.max(...vs.map(v=>Math.max(...v.r.map(Math.abs))));if(m*k>Math.min(W,H)*.42)fit()}
+function sync(){$('#az').value=az;$('#el').value=el}
+function fit(){calc();const rc=$('#cv').getBoundingClientRect(),m=Math.max(3,...vs.map(v=>Math.max(...v.r.map(Math.abs))));k=Math.min(rc.width,rc.height)*(dim==3?.3:.42)/m;render()}
+function opUI(){const t=$('#op').value;$('#wb').style.display=(t=='mul'||t=='unit')?'none':'';$('#wk').style.display=t=='mul'?'':'none'}
+function mode(d){dim=d;$('#m2').classList.toggle('on',d==2);$('#m3').classList.toggle('on',d==3);
+if(d==2){sv={az,el};az=0;el=90}else{az=sv.az;el=sv.el}
+$('#az').disabled=$('#el').disabled=d==2;[...$('#op').options].forEach(o=>{if(o.value=='cross')o.disabled=d==2});
+if(d==2&&$('#op').value=='cross')$('#op').value='add';opUI();sync();fit()}
+$('#m2').onclick=()=>mode(2);$('#m3').onclick=()=>mode(3);
+$('#az').oninput=()=>{az=+$('#az').value;draw()};$('#el').oninput=()=>{el=+$('#el').value;draw()};
+$('#fit').onclick=fit;
+$('#v0').onclick=()=>{if(dim==3){az=-105;el=28;sync();draw()}};
+$('#vt').onclick=()=>{if(dim==3){az=0;el=90;sync();draw()}};
+$('#vn').onclick=()=>{if(dim!=3)return;const U=by($('#su').value),V=by($('#sv').value);if(!U||!V)return;let n=cr(U.r,V.r);const l=len(n);if(l<1e-9)return;n=n.map(t=>t/l);if(n[2]<0)n=n.map(t=>-t);
+el=Math.max(-90,Math.min(90,Math.asin(n[2])*180/Math.PI));az=Math.atan2(-n[0],-n[1])*180/Math.PI;sync();draw()};
+['cg','cl','cb','cp'].forEach(i=>$('#'+i).onchange=draw);$('#ph').onchange=render;$('#su').onchange=$('#sv').onchange=render;$('#op').onchange=opUI;
+const cv=$('#cv');let dr=null;
+cv.onpointerdown=e=>{dr=[e.clientX,e.clientY];cv.setPointerCapture(e.pointerId)};
+cv.onpointermove=e=>{if(!dr||dim==2)return;az+=(e.clientX-dr[0])*.4;el=Math.max(-90,Math.min(90,el+(e.clientY-dr[1])*.4));dr=[e.clientX,e.clientY];az=((az+540)%360)-180;sync();draw()};
+cv.onpointerup=cv.onpointercancel=()=>dr=null;
+cv.onwheel=e=>{e.preventDefault();k=Math.max(5,Math.min(400,k*Math.exp(-e.deltaY*.0015)));draw()};
+new ResizeObserver(()=>draw()).observe(cv.parentElement);
+matchMedia('(prefers-color-scheme: dark)').addEventListener('change',draw);
+const EX={perp:{v:[['a',[2,3,0]],['b',[3,-2,0]]],t:'⟨a, b⟩ = 0, поэтому угол равен 90°.'},par:{v:[['a',[3,1,0]],['b',[-6,-2,0]]],t:'b = −2a: векторы противонаправлены, φ = 180°.'},sum:{v:[['a',[3,1,0]],['b',[1,3,0]]],ops:['add','sub'],t:'Сумма достраивает параллелограмм, разность идёт от конца b к концу a.'},proj:{v:[['a',[4,3,0]],['b',[5,1,0]]],ops:['proj'],cp:1,t:'Оранжевый отрезок на b это проекция a на b, его длина ⟨a, b⟩ / |b|.'}};
+$('#ex').onchange=()=>{const e=EX[$('#ex').value];if(!e)return;$('#ph').checked=false;$('#cp').checked=!!e.cp;if(dim!=2)mode(2);vs.length=0;e.v.forEach(([n,c])=>mk(n,c));
+(e.ops||[]).forEach(t=>{const A=vs[0],B=vs[1];mk({add:A.n+'+'+B.n,sub:A.n+'−'+B.n,proj:'пр_'+B.n+' '+A.n}[t],[0,0,0],{t,a:A.id,b:B.id,k:1})});$('#et').textContent=e.t;buildList();fit()};
+$('#pn').onclick=()=>{const R=()=>Math.round(Math.random()*8-4);let a,b;do{a=[R(),R(),dim==3?R():0];b=[R(),R(),dim==3?R():0]}while(!len(a)||!len(b)||len(cr(a,b))<1e-9);
+vs.length=0;mk('a',a);mk('b',b);$('#ph').checked=true;$('#pa').value=$('#pb').value='';$('#pr').innerHTML='';$('#pt').textContent='Найдите ⟨a, b⟩ и угол между a и b (до десятых).';buildList();fit()};
+$('#pc').onclick=()=>{const U=by($('#su').value),V=by($('#sv').value);if(!U||!V)return;const d=dot(U.r,V.r),g=Math.acos(Math.max(-1,Math.min(1,d/len(U.r)/len(V.r))))*180/Math.PI,x1=p($('#pa').value),x2=p($('#pb').value);
+$('#pr').innerHTML=`<div>⟨${E(U.n)}, ${E(V.n)}⟩: ${isNaN(x1)?'введите число':Math.abs(x1-d)<.01?'верно ✓':'неверно, проверьте произведения координат'}</div><div>φ: ${isNaN(x2)?'введите число':Math.abs(x2-g)<.1?'верно ✓':'неверно: cos φ = ⟨u, v⟩ / (|u|·|v|)'}</div>`};
+let spOn=false;
+function basis(a){const B=[];a.forEach(v=>{let u=v.slice();B.forEach(e=>{const d=dot(u,e);u=u.map((t,i)=>t-d*e[i])});const l=len(u);if(l>1e-9)B.push(u.map(t=>t/l))});return B}
+function spanUI(){$('#spl').innerHTML=vs.map(v=>`<div class="sr" data-id="${v.id}"><label><input type="checkbox" class="sc"${v.sp?' checked':''}><span style="color:${v.col}">${E(v.n)}</span></label><input type="range" class="sk" min="-3" max="3" step="0.1" value="${v.cf}"><span>${f(v.cf)}</span></div>`).join('')}
+function spanInfo(){const S=vs.filter(v=>v.sp),r=basis(S.map(v=>v.r)).length;let cm=[0,0,0];S.forEach(v=>cm=cm.map((t,i)=>t+v.cf*v.r[i]));
+$('#si').innerHTML=S.length?`<div>Размерность оболочки: <b>${r}</b> (${['нулевая: только точка O','прямая','плоскость','всё пространство'][r]})</div><div>w = ${S.map(v=>w(v.cf)+'·'+E(v.n)).join(' + ')} = (${cm.slice(0,dim).map(f).join('; ')})</div>`:'<div>Отметьте хотя бы один вектор.</div>'}
+$('#spl').addEventListener('input',e=>{if(e.target.classList.contains('sk')){const v=by(e.target.closest('.sr').dataset.id);v.cf=+e.target.value;e.target.nextElementSibling.textContent=f(v.cf);render()}});
+$('#spl').addEventListener('change',e=>{if(e.target.classList.contains('sc')){by(e.target.closest('.sr').dataset.id).sp=e.target.checked;render()}});
+$('#sp').onclick=()=>{spOn=!spOn;$('#sp').classList.toggle('on',spOn);$('#sp').textContent=spOn?'Скрыть оболочку':'Показать оболочку';render()};
+$('#pm').onclick=()=>{const all=vs.every(v=>v.pt);vs.forEach(v=>v.pt=!all);buildList()};
+function exp(){return JSON.stringify({v:1,dim,az:Math.round(az),el:Math.round(el),sp:spOn,o:['cg','cl','cb','cp'].map(i=>$('#'+i).checked?1:0),vs:vs.map(v=>({n:v.n,c:v.c,pt:v.pt,sp:v.sp,cf:v.cf,op:v.op?{t:v.op.t,a:vs.findIndex(u=>u.id==v.op.a),b:v.op.b==null?null:vs.findIndex(u=>u.id==v.op.b),k:v.op.k}:null}))})}
+function imp(s){const m=$('#im'),old=vs.slice();try{const d=JSON.parse(s),ok=['add','sub','mul','cross','proj','unit'],ids=[];if(!Array.isArray(d.vs)||!d.vs.length)throw 0;vs.length=0;
+d.vs.forEach(o=>{let op=null;if(o.op){if(!ok.includes(o.op.t)||ids[o.op.a]==null||(o.op.b!=null&&ids[o.op.b]==null))throw 0;op={t:o.op.t,a:ids[o.op.a],b:o.op.b==null?null:ids[o.op.b],k:isNaN(+o.op.k)?1:+o.op.k}}
+const c=[0,1,2].map(i=>+(o.c&&o.c[i])||0),v=mk(String(o.n).slice(0,12),c,op);v.pt=!!o.pt;v.sp=!!o.sp;v.cf=o.cf==null||isNaN(+o.cf)?1:+o.cf;ids.push(v.id)});
+const dm=d.dim==2?2:3;if(dm!=dim)mode(dm);if(dm==3&&!isNaN(+d.az)&&!isNaN(+d.el)){az=+d.az;el=Math.max(-90,Math.min(90,+d.el));sync()}
+['cg','cl','cb','cp'].forEach((i,j)=>{if(d.o)$('#'+i).checked=!!d.o[j]});if(spOn!==!!d.sp)$('#sp').click();
+buildList();fit();m.textContent='Сцена загружена, векторов: '+vs.length+'.'}catch(e){vs.length=0;old.forEach(v=>vs.push(v));m.textContent='Не получилось загрузить: проверьте, что вставлен весь текст экспорта.'}}
+$('#xe').onclick=()=>{const t=$('#io');t.value=exp();t.focus();t.select();$('#im').textContent='Текст готов: скопируйте его (Ctrl+C).'};
+$('#xi').onclick=()=>imp($('#io').value);
+$('#xd').onclick=()=>{if(window.Telegram&&Telegram.WebApp&&Telegram.WebApp.initData!==undefined&&Telegram.WebApp.platform!=='unknown'){const t=exp();(navigator.clipboard?navigator.clipboard.writeText(t):Promise.reject()).then(()=>Telegram.WebApp.showAlert('JSON скопирован в буфер обмена'),()=>Telegram.WebApp.showAlert('Не удалось скопировать'));return}const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([exp()],{type:'application/json'}));a.download='vectors.json';a.click()};
+$('#if').onchange=e=>{const fl=e.target.files[0];if(!fl)return;const r=new FileReader();r.onload=()=>{$('#io').value=r.result;imp(r.result)};r.readAsText(fl)};
+const g=t=>{if(!isFinite(t))return isNaN(t)?'не определено':t>0?'+∞':'−∞';t=Math.abs(t)<5e-12?0:t;return String(Math.round(t*1e6)/1e6).replace('.',',').replace('-','−')},q=t=>t<0?'('+g(t)+')':g(t);
+const IP=[['x²','x^2','x^3/3','x³/3','0','2'],['x³ − 2x','x^3-2*x','x^4/4-x^2','x⁴/4 − x²','0','2'],['sin x','sin(x)','-cos(x)','−cos x','0','pi'],['cos x','cos(x)','sin(x)','sin x','0','pi/2'],['eˣ','exp(x)','exp(x)','eˣ','0','1'],['1/x','1/x','ln(abs(x))','ln|x|','1','3'],['√x','sqrt(x)','2*x^1.5/3','2x^(3/2)/3','0','4'],['1/(1+x²)','1/(1+x^2)','atan(x)','arctg x','-1','1'],['x·eˣ (по частям)','x*exp(x)','(x-1)*exp(x)','(x − 1)·eˣ','0','1']];
+function pf(s){const t0=par(s);return t0?x=>ev2(t0,x):null}
+function pfo(s){s=nz(String(s)).toLowerCase().replace(/\^/g,'**').replace(/,/g,'.').trim();const fn=['sin','cos','tan','exp','ln','log','sqrt','abs','asin','acos','atan','sinh','cosh','tanh'];
+if(!/^[0-9a-z+\-*/().\s]*$/.test(s)||!(s.match(/[a-z]+/g)||[]).every(t=>t=='x'||t=='pi'||t=='e'||fn.includes(t)||t in VARS))return null;
+s=s.replace(/(\d|\))\s*(?=[a-z(])/g,'$1*').replace(/x\s*(?=x|\(|pi|[a-z]{2,})/g,'x*').replace(/(^|\()\s*-/g,(m,a)=>a+'0-');
+try{const ks=Object.keys(VARS),G=new Function('x','V','const{sin,cos,tan,exp,sqrt,abs,asin,acos,atan,sinh,cosh,tanh}=Math,ln=Math.log,log=Math.log10,pi=Math.PI,e=Math.E;'+(ks.length?'const{'+ks.join(',')+'}=V;':'')+'return('+s+')'),F=x=>G(x,VARS);F(1);return F}catch(_){return null}}
+const pv=s=>{const h=pf(s);return h?h(0):NaN},ev=(F,t)=>{const y=F(t);return isFinite(y)?y:NaN};
+function sumI(F,a,b,n,me){if(me=='simp'&&n%2)n++;const dx=(b-a)/n,Y=i=>ev(F,a+i*dx);let s=0;
+if(me=='left')for(let i=0;i<n;i++)s+=Y(i);else if(me=='right')for(let i=1;i<=n;i++)s+=Y(i);else if(me=='mid')for(let i=0;i<n;i++)s+=ev(F,a+i*dx+dx/2);
+else if(me=='trap'){s=(Y(0)+Y(n))/2;for(let i=1;i<n;i++)s+=Y(i)}else if(me=='simp'){s=Y(0)+Y(n);for(let i=1;i<n;i++)s+=(i%2?4:2)*Y(i);s/=3}
+else{let L=0;for(let i=0;i<n;i++)L+=Math.hypot(dx,Y(i+1)-Y(i));return{v:L,n,dx}}return{v:s*dx,n,dx}}
+function idraw(){const c=$('#ic'),rc=c.getBoundingClientRect(),d=devicePixelRatio||1,w0=rc.width,h0=rc.height;if(!w0)return;c.width=w0*d;c.height=h0*d;const x=c.getContext('2d');x.setTransform(d,0,0,d,0,0);x.font='13px system-ui,sans-serif';
+const cs=getComputedStyle(document.documentElement),mu=cs.getPropertyValue('--mut'),gr=cs.getPropertyValue('--grid'),fg=cs.getPropertyValue('--fg');
+const F=pf($('#ifx').value),a=pv($('#ia').value),b=pv($('#ib').value),n=+$('#in').value,me=$('#imt').value,o=$('#iout');$('#inv').textContent=n;
+if(!F||isNaN(a)||isNaN(b)||a>=b){o.innerHTML='<div>Не удалось разобрать f(x) или границы: нужно a &lt; b.</div>';return}
+const S=[];for(let i=0;i<=300;i++){const t=a+(b-a)*i/300;S.push([t,ev(F,t)])}const ys=S.map(s=>s[1]).filter(isFinite);
+if(!ys.length){o.innerHTML='<div>Функция не определена на отрезке.</div>';return}
+ let y0=Math.min(0,...ys),y1=Math.max(0,...ys);if(y1-y0<1e-9){y0-=1;y1+=1}const py=(y1-y0)*.12,px=(b-a)*.12;y0-=py;y1+=py;const x0=a-px,x1=b+px;
+const X=t=>44+(t-x0)/(x1-x0)*(w0-56),Y=v=>h0-26-(v-y0)/(y1-y0)*(h0-38),ns=r=>{const p=Math.pow(10,Math.floor(Math.log10(r/5))),m=r/5/p;return p*(m<1.5?1:m<3.5?2:m<7.5?5:10)};
+const ln=(p1,p2,c,lw)=>{x.beginPath();x.strokeStyle=c;x.lineWidth=lw||1;x.moveTo(p1[0],p1[1]);x.lineTo(p2[0],p2[1]);x.stroke()};
+let st=ns(x1-x0);x.fillStyle=mu;x.textAlign='center';for(let t=Math.ceil(x0/st)*st;t<=x1+1e-9;t+=st){ln([X(t),12],[X(t),h0-26],gr);x.fillText(g(t),X(t),h0-9)}
+st=ns(y1-y0);x.textAlign='right';for(let t=Math.ceil(y0/st)*st;t<=y1+1e-9;t+=st){ln([44,Y(t)],[w0-12,Y(t)],gr);x.fillText(g(t),38,Y(t)+4)}
+if(y0<0&&y1>0)ln([44,Y(0)],[w0-12,Y(0)],mu,1.4);if(x0<0&&x1>0)ln([X(0),12],[X(0),h0-26],mu,1.4);
+const poly=(P,fl,sk)=>{x.beginPath();P.forEach((p,i)=>i?x.lineTo(X(p[0]),Y(p[1])):x.moveTo(X(p[0]),Y(p[1])));x.closePath();x.fillStyle=fl;x.fill();x.strokeStyle=sk;x.lineWidth=1;x.stroke()};
+const R=sumI(F,a,b,n,me),ne=R.n,dx=R.dx,bl='rgba(55,138,221,',rd='rgba(216,90,48,',col=h=>h<0?[rd+'.28)',rd+'.8)']:[bl+'.28)',bl+'.8)'];
+if(me=='simp'){for(let i=0;i<ne;i+=2){const xa=a+i*dx,xm=xa+dx,xb=xa+2*dx,u=ev(F,xa),v=ev(F,xm),w=ev(F,xb),P=[[xa,0]];
+for(let j=0;j<=16;j++){const t=xa+2*dx*j/16;P.push([t,u*(t-xm)*(t-xb)/(2*dx*dx)-v*(t-xa)*(t-xb)/(dx*dx)+w*(t-xa)*(t-xm)/(2*dx*dx)])}P.push([xb,0]);const k2=col(v);poly(P,k2[0],k2[1])}}
+else if(me!='arc'){for(let i=0;i<ne;i++){const xl=a+i*dx,xr=xl+dx;let P,h;if(me=='trap'){P=[[xl,0],[xl,ev(F,xl)],[xr,ev(F,xr)],[xr,0]];h=ev(F,xl+dx/2)}else{h=me=='left'?ev(F,xl):me=='right'?ev(F,xr):ev(F,xl+dx/2);P=[[xl,0],[xl,h],[xr,h],[xr,0]]}const k2=col(h);poly(P,k2[0],k2[1])}}
+x.beginPath();let on=false;S.forEach(([t,v])=>{if(!isFinite(v)){on=false;return}on?x.lineTo(X(t),Y(v)):x.moveTo(X(t),Y(v));on=true});x.strokeStyle='#7F77DD';x.lineWidth=2.2;x.stroke();
+if(me=='arc'){for(let i=0;i<ne;i++){const p1=[X(a+i*dx),Y(ev(F,a+i*dx))],p2=[X(a+(i+1)*dx),Y(ev(F,a+(i+1)*dx))];ln(p1,p2,'#D85A30',2.5);if(ne<=30){x.beginPath();x.fillStyle='#D85A30';x.arc(p2[0],p2[1],3,0,7);x.fill()}}}
+x.fillStyle=fg;x.textAlign='left';x.fillText($('#imt').selectedOptions[0].textContent+', n = '+ne,50,26);
+const ref=sumI(F,a,b,4000,me=='arc'?'arc':'simp').v,err=Math.abs(R.v-ref),fm={left:'Sₙ = Δx·[f(x₀) + … + f(xₙ₋₁)]',right:'Sₙ = Δx·[f(x₁) + … + f(xₙ)]',mid:'Sₙ = Δx·[f(x₀ + Δx/2) + …]',trap:'Sₙ = Δx·[f(x₀)/2 + f(x₁) + … + f(xₙ)/2]',simp:'Sₙ = (Δx/3)·[f(x₀) + 4f(x₁) + 2f(x₂) + … + f(xₙ)]',arc:'L = Σ|Δrᵢ| = Σ√⟨Δrᵢ, Δrᵢ⟩, Δrᵢ = (Δx; Δyᵢ)'};
+ let h=`<div>Δx = (b − a)/n = (${g(b)} − ${q(a)})/${ne} = ${g(dx)}${me=='simp'&&n%2?' (n сделан чётным)':''}</div><div>${fm[me]}</div>`;
+if(me=='arc')for(let i=0;i<Math.min(3,ne);i++){const dy=ev(F,a+(i+1)*dx)-ev(F,a+i*dx);h+=`<div>Δr<sub>${i+1}</sub> = (${g(dx)}; ${g(dy)}), |Δr<sub>${i+1}</sub>| = √⟨Δr, Δr⟩ = ${g(Math.hypot(dx,dy))}</div>`}
+h+=`<div>${me=='arc'?'L':'Sₙ'} = <b>${g(R.v)}</b></div><div>Эталон (численно, 4000 разбиений) = ${g(ref)}; погрешность = ${g(err)}</div>`;
+const ix=$('#ip').value;if(ix!==''&&me!='arc'&&!S.every(s=>isFinite(s[1]))){h+='<div style="margin-top:8px">На отрезке функция не определена или обращается в бесконечность: интеграл несобственный, формула Ньютона–Лейбница напрямую неприменима.</div>'}else if(ix!==''&&me!='arc'){const p=IP[+ix],PF=pf(p[2]),Fa=PF(a),Fb=PF(b);h+=`<div style="margin-top:8px"><b>Формула Ньютона–Лейбница</b></div><div>∫ f(x) dx = ${p[3]} + C</div><div>∫ₐᵇ f dx = F(b) − F(a) = F(${g(b)}) − F(${g(a)}) = ${g(Fb)} − ${q(Fa)} = <b>${g(Fb-Fa)}</b></div>`}
+o.innerHTML=h}
+$('#ip').innerHTML='<option value="">свой вариант</option>'+IP.map((p,i)=>`<option value="${i}">${p[0]}</option>`).join('');
+function setP(i){const p=IP[i];$('#ifx').value=p[1];$('#ia').value=p[4];$('#ib').value=p[5]}
+setP(0);$('#ip').value='0';
+$('#ip').onchange=()=>{if($('#ip').value!=='')setP(+$('#ip').value);idraw()};
+$('#ifx').addEventListener('input',()=>{$('#ip').value='';idraw()});
+['ia','ib','in','imt'].forEach(i=>$('#'+i).addEventListener('input',idraw));
+new ResizeObserver(()=>idraw()).observe($('#ic').parentElement);matchMedia('(prefers-color-scheme: dark)').addEventListener('change',idraw);
+let cur=1;
+function tab(n){cur=n;const gr=[1,5,6].includes(n)?1:n==7?3:2;$('#tabS').style.display=n==7?'':'none';{const tn=$('#tabN');if(tn)tn.style.display=n==8?'':'none'}$('#t7').classList.toggle('on',n==8);$('#g3').classList.toggle('on',n==7);['tabV','tabI','tabL','tabD','tabC','tabM'].forEach((id,i)=>{$('#'+id).style.display=n==i+1?'':'none';$('#t'+(i+1)).classList.toggle('on',n==i+1)});$('#sub1').style.display=gr==1?'':'none';$('#sub2').style.display=gr==2?'':'none';$('#g1').classList.toggle('on',gr==1);$('#g2').classList.toggle('on',gr==2);autoParams();redraw();fmtAll()}
+const redraw=()=>([render,idraw,ldraw,ddraw,cdraw,mdraw,0,ndraw][cur-1]||(()=>0))();
+[1,2,3,4,5,6].forEach(i=>$('#t'+i).onclick=()=>tab(i));$('#g1').onclick=()=>tab(1);$('#g2').onclick=()=>tab(4);
+const g4=t=>isNaN(t)?'—':!isFinite(t)?(t>0?'+∞':'−∞'):String(Math.round(t*1e4)/1e4).replace('.',',').replace('-','−');
+function csetup(id){const c=$(id),rc=c.getBoundingClientRect(),d=devicePixelRatio||1;if(!rc.width)return null;c.width=rc.width*d;c.height=rc.height*d;const x=c.getContext('2d');x.setTransform(d,0,0,d,0,0);x.font='13px system-ui,sans-serif';const cs=getComputedStyle(document.documentElement);return{x,w:rc.width,h:rc.height,mu:cs.getPropertyValue('--mut'),gr:cs.getPropertyValue('--grid'),fg:cs.getPropertyValue('--fg')}}
+const lnx=(x,p1,p2,c,lw,da)=>{x.beginPath();x.setLineDash(da||[]);x.strokeStyle=c;x.lineWidth=lw||1;x.moveTo(p1[0],p1[1]);x.lineTo(p2[0],p2[1]);x.stroke();x.setLineDash([])};
+const nic=r=>{const p=Math.pow(10,Math.floor(Math.log10(r/5))),m=r/5/p;return p*(m<1.5?1:m<3.5?2:m<7.5?5:10)};
+const LP=[['sin x / x','sin(x)/x','0'],['(x² − 1)/(x − 1)','(x^2-1)/(x-1)','1'],['(1 − cos x)/x²','(1-cos(x))/x^2','0'],['(eˣ − 1)/x','(exp(x)-1)/x','0'],['1/x (предела нет)','1/x','0'],['|x|/x (односторонние разные)','abs(x)/x','0'],['(1 + 1/x)ˣ','(1+1/x)^x','inf'],['(3x² + 1)/(2x² − x)','(3*x^2+1)/(2*x^2-x)','inf']];
+const tf=(t,d=6)=>{if(isNaN(t))return'—';if(!isFinite(t))return t>0?'+∞':'−∞';if(t==0)return'0';const A=Math.abs(t);if(A<1e-3||A>=1e9){const[m,e]=t.toExponential(d-1).split('e');return m.replace(/\.?0+$/,'').replace('.',',').replace('-','−')+'·10'+String(+e).replace('-','⁻').replace(/\d/g,c=>'⁰¹²³⁴⁵⁶⁷⁸⁹'[c])}return String(Number(t.toPrecision(d))).replace('.',',').replace('-','−')};
+const pa=s=>{s=String(s).trim().toLowerCase().replace('∞','inf');return /^\+?inf$/.test(s)?Infinity:/^-\s*inf$/.test(s)?-Infinity:pv(s)};
+function ldraw(){const S0=csetup('#lc');if(!S0)return;const{x,w:w0,h:h0,mu,gr,fg}=S0,F=pf($('#lfx').value),a=pa($('#la').value),o=$('#lout'),fin=isFinite(a);
+if(!F||isNaN(a)){o.innerHTML='<div>Не удалось разобрать f(x) или точку a.</div>';return}
+const sides=fin?[-1,1]:[a>0?1:-1],K=[1,2,3,4,5,6],seq=s=>K.map(k=>{const t=fin?a+s*Math.pow(10,-k):s*Math.pow(10,k);return[t,F(t)]});
+const lim=sq=>{if(sq.every(p=>isNaN(p[1])))return{nd:1};const V=sq.map(p=>p[1]),v4=V[3],v5=V[4],v6=V[5];
+if(!isNaN(v6)&&!isFinite(v6)&&Math.abs(v5)>1e3)return{i:Math.sign(v6)};
+if(Math.abs(v6)>1e5&&Math.abs(v6)>Math.abs(v5)&&Math.sign(v5)==Math.sign(v6)&&(isNaN(v4)||Math.sign(v4)==Math.sign(v6)))return{i:Math.sign(v6)};
+if(isFinite(v6)&&isFinite(v5)&&Math.abs(v6-v5)<1e-3*(1+Math.abs(v6)))return{v:v6};
+if(V.every(isFinite)){const d=V.slice(1).map((v,i)=>v-V[i]);
+if(Math.abs(v4)<Math.abs(v5)&&Math.abs(v5)<Math.abs(v6)&&Math.abs(v6)>8&&Math.sign(v4)==Math.sign(v6)&&Math.sign(d[3])==Math.sign(d[4])&&Math.abs(d[4])>=.5*Math.abs(d[3]))return{i:Math.sign(v6)};
+if(d.slice(0,5).every(x=>x)){const r=[1,2,3,4].map(i=>d[i]/d[i-1]);if(r.every(x=>x>.05&&x<=.4)&&Math.max(...r)-Math.min(...r)<.02)return{v:(v6-r[3]*v5)/(1-r[3])}}}
+return null};
+const lf=l=>l?(l.nd?'не определена':l.i?(l.i>0?'+∞':'−∞'):g4(l.v)):'не удалось оценить',sq=sides.map(seq),ls=sq.map(lim);
+let L=null,txt='';
+if(fin){const[l,r]=ls;txt=`lim<sub>x→a⁻</sub> = ${lf(l)}, lim<sub>x→a⁺</sub> = ${lf(r)}`;if(l&&r&&(!!l.nd!=!!r.nd)){L=l.nd?r:l;txt+=`<br>Функция определена только с одной стороны, поэтому предел односторонний: <b>${lf(L)}</b>`}else if(l&&r&&!l.nd&&((l.i&&l.i==r.i)||(l.v!=null&&r.v!=null&&Math.abs(l.v-r.v)<1e-3*(1+Math.abs(l.v))))){L=l;txt+=`<br>Односторонние пределы равны, поэтому lim = <b>${lf(l)}</b>`}else if(l&&r)txt+='<br>Односторонние пределы различны: предел не существует.'}
+else{L=ls[0];txt=`lim<sub>x→${a>0?'+∞':'−∞'}</sub> = <b>${lf(L)}</b>`}
+const Rw=Math.pow(10,+$('#lh').value+(fin?0:1)),x0=fin?a-Rw:-Rw,x1=fin?a+Rw:Rw,S=[];for(let i=0;i<=400;i++){const t=x0+(x1-x0)*i/400;S.push([t,F(t)])}
+const ys=S.map(s=>s[1]).filter(v=>isFinite(v)&&Math.abs(v)<1e6).sort((p,q)=>p-q);let y0=0,y1=1;if(ys.length){y0=ys[Math.floor(.04*(ys.length-1))];y1=ys[Math.floor(.96*(ys.length-1))]}
+const Lv=L&&L.v!=null?L.v:null,eps=Math.pow(10,+$('#le').value);$('#lev').textContent=g4(eps);if(Lv!=null){y0=Math.min(y0,Lv-eps);y1=Math.max(y1,Lv+eps)}
+if(y1-y0<1e-9){y0-=1;y1+=1}const pyy=(y1-y0)*.25;y0-=pyy;y1+=pyy;
+const X=t=>44+(t-x0)/(x1-x0)*(w0-56),Y=v=>h0-26-(v-y0)/(y1-y0)*(h0-38);
+let st=nic(x1-x0);x.fillStyle=mu;x.textAlign='center';for(let t=Math.ceil(x0/st)*st;t<=x1+1e-9;t+=st){lnx(x,[X(t),12],[X(t),h0-26],gr);x.fillText(g4(t),X(t),h0-9)}
+st=nic(y1-y0);x.textAlign='right';for(let t=Math.ceil(y0/st)*st;t<=y1+1e-9;t+=st){lnx(x,[44,Y(t)],[w0-12,Y(t)],gr);x.fillText(g4(t),38,Y(t)+4)}
+if(y0<0&&y1>0)lnx(x,[44,Y(0)],[w0-12,Y(0)],mu,1.4);if(x0<0&&x1>0)lnx(x,[X(0),12],[X(0),h0-26],mu,1.4);
+let dl=0;
+if(Lv!=null){x.fillStyle='rgba(186,117,23,.18)';x.fillRect(44,Y(Lv+eps),w0-56,Y(Lv-eps)-Y(Lv+eps));
+if(fin){dl=Rw;for(let i=1;i<=2000;i++){const t=Rw*i/2000;if(!((isNaN(F(a-t))||Math.abs(F(a-t)-Lv)<eps)&&(isNaN(F(a+t))||Math.abs(F(a+t)-Lv)<eps))){dl=Rw*(i-1)/2000;break}}x.fillStyle='rgba(29,158,117,.18)';x.fillRect(X(a-dl),12,X(a+dl)-X(a-dl),h0-38);lnx(x,[X(a),12],[X(a),h0-26],'#1D9E75',1,[5,4])}
+else{const s=a>0?1:-1;for(let i=2000;i>=1;i--){const t=Rw*i/2000;if(!(Math.abs(F(s*t)-Lv)<eps)){dl=t;break}}x.fillStyle='rgba(29,158,117,.18)';x.fillRect(Math.min(X(s*dl),X(s*Rw)),12,Math.abs(X(s*Rw)-X(s*dl)),h0-38)}
+lnx(x,[44,Y(Lv)],[w0-12,Y(Lv)],'#BA7517',1,[5,4])}
+x.beginPath();let on=false;S.forEach(([t,v])=>{if(!isFinite(v)||Math.abs(v)>1e6){on=false;return}on?x.lineTo(X(t),Y(v)):x.moveTo(X(t),Y(v));on=true});x.strokeStyle='#7F77DD';x.lineWidth=2.2;x.stroke();
+if(tay)tayCalc(x,X,Y,x0,x1,a,fin);else $('#ltx').innerHTML='';if(fin&&Lv!=null){x.beginPath();x.arc(X(a),Y(Lv),4,0,7);x.fillStyle=cs0();x.fill();x.strokeStyle='#7F77DD';x.lineWidth=1.5;x.stroke()}
+function cs0(){return getComputedStyle(document.documentElement).getPropertyValue('--bg')}
+if(Lv!=null)txt+=fin?`<br>ε = ${g4(eps)}: при 0 &lt; |x − a| &lt; δ ≈ ${g4(dl)} выполнено |f(x) − L| &lt; ε`:`<br>ε = ${g4(eps)}: при |x| &gt; N ≈ ${g4(dl)} выполнено |f(x) − L| &lt; ε`;
+o.innerHTML='<table><tr>'+(fin?'<th>x → a⁻</th><th>f(x)</th><th>x → a⁺</th><th>f(x)</th>':'<th>x</th><th>f(x)</th>')+'</tr>'+K.map((k,i)=>'<tr>'+sq.map(s=>`<td>${tf(s[i][0],7)}</td><td>${tf(s[i][1],6)}</td>`).join('')+'</tr>').join('')+'</table><div style="margin-top:8px">'+txt+'</div>'}
+$('#lp').innerHTML='<option value="">свой вариант</option>'+LP.map((p,i)=>`<option value="${i}">${p[0]}</option>`).join('');
+function setL(i){const p=LP[i];$('#lfx').value=p[1];$('#la').value=p[2]}setL(0);$('#lp').value='0';
+$('#lp').onchange=()=>{if($('#lp').value!=='')setL(+$('#lp').value);ldraw()};
+$('#lfx').addEventListener('input',()=>{$('#lp').value='';ldraw()});['la','lh','le'].forEach(i=>$('#'+i).addEventListener('input',ldraw));
+const nd=a=>{a=((a%360)+360)%360;return a>180?a-360:a},cmul=(u,v)=>[u[0]*v[0]-u[1]*v[1],u[0]*v[1]+u[1]*v[0]],fc=z=>`${g4(z[0])} ${z[1]<0&&Math.round(Math.abs(z[1])*1e4)>0?'−':'+'} ${g4(Math.abs(z[1]))}i`;
+function cdraw(){const S0=csetup('#cc');if(!S0)return;const{x,w:w0,h:h0,mu,gr}=S0,P=s=>{const v=p($(s).value);return isNaN(v)?0:v};
+const z1=[P('#c1a'),P('#c1b')],z2=[P('#c2a'),P('#c2b')],op=$('#cop').value,n=+$('#cn').value;$('#cnv').textContent=n;
+const two=['add','sub','mul','div'].includes(op),r1=Math.hypot(z1[0],z1[1]),f1=Math.atan2(z1[1],z1[0]),r2=Math.hypot(z2[0],z2[1]),f2=Math.atan2(z2[1],z2[0]);let W=[];
+if(op=='add')W=[[z1[0]+z2[0],z1[1]+z2[1]]];else if(op=='sub')W=[[z1[0]-z2[0],z1[1]-z2[1]]];else if(op=='mul')W=[cmul(z1,z2)];
+else if(op=='div'){const d=r2*r2;W=[d?cmul(z1,[z2[0],-z2[1]]).map(t=>t/d):[NaN,NaN]]}else if(op=='conj')W=[[z1[0],-z1[1]]];
+else if(op=='pow')W=[[Math.pow(r1,n)*Math.cos(n*f1),Math.pow(r1,n)*Math.sin(n*f1)]];
+else for(let k=0;k<n;k++){const rho=Math.pow(r1,1/n),an=(f1+2*Math.PI*k)/n;W.push([rho*Math.cos(an),rho*Math.sin(an)])}
+const ext=Math.max(1,...[z1,...(two?[z2]:[]),...W].map(z=>Math.max(Math.abs(z[0]),Math.abs(z[1]))).filter(isFinite))*1.25,k=Math.min(w0,h0)/2/ext,cx=w0/2,cy=h0/2,Pp=z=>[cx+k*z[0],cy-k*z[1]];
+const st=nic(2*ext);x.fillStyle=mu;for(let t=-Math.floor(ext/st)*st;t<=ext;t+=st){lnx(x,Pp([t,-ext]),Pp([t,ext]),gr);lnx(x,Pp([-ext,t]),Pp([ext,t]),gr);if(Math.abs(t)>1e-9){x.textAlign='center';x.fillText(g4(t),Pp([t,0])[0],cy+14);x.textAlign='right';x.fillText(g4(t),cx-6,Pp([0,t])[1]+4)}}
+lnx(x,Pp([-ext,0]),Pp([ext,0]),mu,1.4);lnx(x,Pp([0,-ext]),Pp([0,ext]),mu,1.4);x.textAlign='left';x.fillText('Re',w0-26,cy-6);x.fillText('Im',cx+6,16);
+x.beginPath();x.setLineDash([4,4]);x.strokeStyle=mu;x.lineWidth=1;x.arc(cx,cy,k,0,7);x.stroke();x.setLineDash([]);
+const AR=(z,c,lw)=>{const s=Pp([0,0]),t=Pp(z);lnx(x,s,t,c,lw);const g=Math.atan2(t[1]-s[1],t[0]-s[0]);x.beginPath();x.fillStyle=c;x.moveTo(t[0],t[1]);x.lineTo(t[0]-9*Math.cos(g-.4),t[1]-9*Math.sin(g-.4));x.lineTo(t[0]-9*Math.cos(g+.4),t[1]-9*Math.sin(g+.4));x.closePath();x.fill()};
+const T=(z,s,c)=>{const q=Pp(z);x.fillStyle=c;x.textAlign='left';x.fillText(s,q[0]+8,q[1]-8)},arc=(f,r,c)=>{x.beginPath();x.strokeStyle=c;x.lineWidth=1.5;x.arc(cx,cy,r,0,-f,f>0);x.stroke()};
+const w1=W[0];if(op=='add'){lnx(x,Pp(z1),Pp(w1),mu,1,[5,4]);lnx(x,Pp(z2),Pp(w1),mu,1,[5,4])}else if(op=='sub')lnx(x,Pp(z2),Pp(z1),mu,1,[5,4]);
+if(['mul','div','pow'].includes(op)){arc(f1,30,'#7F77DD');if(op!='pow')arc(f2,44,'#1D9E75');if(isFinite(w1[0]+w1[1]))arc(Math.atan2(w1[1],w1[0]),58,'#D85A30')}
+AR(z1,'#7F77DD',2.5);T(z1,'z₁','#7F77DD');if(two){AR(z2,'#1D9E75',2.5);T(z2,'z₂','#1D9E75')}
+if(op=='root'){x.beginPath();W.forEach((z,i)=>{const q=Pp(z);i?x.lineTo(q[0],q[1]):x.moveTo(q[0],q[1])});x.closePath();x.strokeStyle='#D85A30';x.lineWidth=1.2;x.stroke();W.forEach((z,i)=>{const q=Pp(z);x.beginPath();x.fillStyle='#D85A30';x.arc(q[0],q[1],4,0,7);x.fill();T(z,'w'+i,'#D85A30')})}
+else if(isFinite(w1[0]+w1[1])){AR(w1,'#D85A30',3);T(w1,'w','#D85A30')}
+const pt=(z,nm)=>{const r=Math.hypot(z[0],z[1]),ph=Math.atan2(z[1],z[0]);return `<div>${nm} = ${fc(z)} ↔ вектор (${g4(z[0])}; ${g4(z[1])}), |${nm}| = √⟨${nm}, ${nm}⟩ = ${g4(r)}, ${r<1e-12?'аргумент нуля не определён':'φ = '+g4(ph*180/Math.PI)+'°'+(piF(ph)?' = '+piF(ph):'')}</div>`};
+let h=pt(z1,'z₁')+(two?pt(z2,'z₂'):'');h+='<div style="margin-top:8px"></div>';
+if(op=='add'||op=='sub')h+=`<div>w = z₁ ${op=='add'?'+':'−'} z₂ = <b>${fc(w1)}</b></div><div>Комплексные числа ${op=='add'?'складываются':'вычитаются'} как векторы (пунктир — параллелограмм или треугольник).</div>`;
+else if(op=='mul')h+=`<div>(a₁ + b₁i)(a₂ + b₂i) = (a₁a₂ − b₁b₂) + (a₁b₂ + a₂b₁)i = <b>${fc(w1)}</b></div><div>|w| = |z₁|·|z₂| = ${g4(r1*r2)}; arg w = φ₁ + φ₂ = ${g4(nd((f1+f2)*180/Math.PI))}° (с точностью до 360°; модули перемножаются, углы складываются)</div>`;
+else if(op=='div')h+=r2?`<div>w = z₁·z̅₂ / |z₂|² = <b>${fc(w1)}</b></div><div>|w| = |z₁|/|z₂| = ${g4(r1/r2)}; arg w = φ₁ − φ₂ = ${g4(nd((f1-f2)*180/Math.PI))}° (с точностью до 360°)</div>`:'<div>Деление на ноль.</div>';
+else if(op=='conj')h+=`<div>z̅₁ = a − bi = <b>${fc(w1)}</b></div><div>Отражение относительно оси Re: модуль тот же, аргумент с обратным знаком.</div>`;
+else if(op=='pow')h+=`<div>Формула Муавра: zⁿ = rⁿ(cos nφ + i sin nφ), rⁿ = ${g4(Math.pow(r1,n))}, nφ = ${g4(n*f1*180/Math.PI)}°</div><div>w = <b>${fc(w1)}</b></div>`;
+else h+=`<div>w<sub>k</sub> = √[${n}]{r}·(cos((φ + 2πk)/${n}) + i sin((φ + 2πk)/${n})), r<sup>1/${n}</sup> = ${g4(Math.pow(r1,1/n))}</div>`+W.map((z,i)=>`<div>w<sub>${i}</sub> = ${fc(z)}</div>`).join('')+'<div>Корни лежат на окружности и образуют правильный n-угольник.</div>';
+$('#cout').innerHTML=h}
+['c1a','c1b','c2a','c2b','cop','cn'].forEach(i=>$('#'+i).addEventListener('input',cdraw));
+new ResizeObserver(()=>ldraw()).observe($('#lc').parentElement);new ResizeObserver(()=>cdraw()).observe($('#cc').parentElement);
+const FN={sin:Math.sin,cos:Math.cos,tan:Math.tan,exp:Math.exp,ln:Math.log,sqrt:Math.sqrt,abs:Math.abs,asin:Math.asin,acos:Math.acos,atan:Math.atan,sinh:Math.sinh,cosh:Math.cosh,tanh:Math.tanh};
+const nn=v=>['n',v],zr=t=>t[0]=='n'&&t[1]===0,o1=t=>t[0]=='n'&&t[1]===1;
+const add=(a,b)=>zr(a)?b:zr(b)?a:a[0]=='n'&&b[0]=='n'?nn(a[1]+b[1]):['+',a,b],neg=a=>a[0]=='n'?nn(-a[1]):a[0]=='neg'?a[1]:['neg',a];
+const sub=(a,b)=>zr(b)?a:zr(a)?neg(b):a[0]=='n'&&b[0]=='n'?nn(a[1]-b[1]):['-',a,b],mul=(a,b)=>zr(a)||zr(b)?nn(0):o1(a)?b:o1(b)?a:a[0]=='n'&&b[0]=='n'?nn(a[1]*b[1]):a[0]=='n'&&!a[2]&&b[0]=='*'&&b[1][0]=='n'&&!b[1][2]?mul(nn(a[1]*b[1][1]),b[2]):b[0]=='n'&&!b[2]&&a[0]=='*'&&a[1][0]=='n'&&!a[1][2]?mul(nn(a[1][1]*b[1]),a[2]):['*',a,b];
+const div=(a,b)=>zr(a)?nn(0):o1(b)?a:JSON.stringify(a)==JSON.stringify(b)?nn(1):a[0]=='n'&&b[0]=='n'&&b[1]!==0?nn(a[1]/b[1]):['/',a,b],pw=(a,b)=>zr(b)?nn(1):o1(b)?a:['^',a,b],hx=t=>t[0]=='x'||t[0]=='y'||(t[0]!='n'&&t.slice(1).some(c=>Array.isArray(c)&&hx(c)));
+function par(s){s=nz(String(s)).toLowerCase().replace(/,/g,'.').replace(/\s+/g,'').replace(/\*\*/g,'^');let T=s.match(/\d+\.?\d*|\.\d+|[a-z]+|[-+*\/^()]/g);if(!T||T.join('')!=s)return null;T=T.flatMap(c=>/^[a-z]{2,}$/.test(c)&&!FN[c]&&c!='pi'&&!(c in VARS)&&!Object.keys(FN).some(f=>c.startsWith(f))?c.split(''):[c]);let i=0;const pk=()=>T[i],nx=()=>T[i++];
+const At=()=>{const c=nx();if(c==null)throw 0;if(/^[\d.]/.test(c))return nn(parseFloat(c));if(c=='('){const a=E();if(nx()!=')')throw 0;return a}if(c=='x')return['x'];if(c=='y'&&YV)return['y'];if(c=='pi')return['n',Math.PI,'π'];if(c=='e')return['n',Math.E,'e'];if(FN[c]&&(pk()=='('||pk()=='^')){let q=null;if(pk()=='^'){nx();q=pk()=='-'?(nx(),neg(At())):At()}let a;if(pk()=='('){nx();a=E();if(nx()!=')')throw 0}else if(q)a=At();else throw 0;const IN={sin:'asin',cos:'acos',tan:'atan'};if(q&&q[0]=='n'&&q[1]===-1&&IN[c])return['f',IN[c],a];const fn=['f',c,a];return q?pw(fn,q):fn}if(c in VARS)return['n',VARS[c],c];throw 0};
+const U=()=>{if(pk()=='-'){nx();return neg(U())}if(pk()=='+'){nx();return U()}const a=At();if(pk()=='^'){nx();return pw(a,U())}return a};
+const Tm=()=>{let a=U();for(;;){const c=pk();if(c=='*'||c=='/'){nx();const b=U();a=c=='*'?mul(a,b):div(a,b)}else if(c&&(/^[\d.a-z]/.test(c)||c=='('))a=mul(a,U());else return a}};
+const E=()=>{let a=Tm();while(pk()=='+'||pk()=='-'){const o=nx(),b=Tm();a=o=='+'?add(a,b):sub(a,b)}return a};
+try{const r=E();return i==T.length?r:null}catch(_){return null}}
+function ev2(t,x){switch(t[0]){case'n':return t[1];case'x':return x;case'y':return YVAL;case'+':return ev2(t[1],x)+ev2(t[2],x);case'-':return ev2(t[1],x)-ev2(t[2],x);case'*':return ev2(t[1],x)*ev2(t[2],x);case'/':return ev2(t[1],x)/ev2(t[2],x);case'^':return Math.pow(ev2(t[1],x),ev2(t[2],x));case'neg':return-ev2(t[1],x);default:return FN[t[1]](ev2(t[2],x))}}
+function D(t){const k=t[0],a=t[1],b=t[2];switch(k){case'n':return nn(0);case'x':return nn(DXV);case'y':return nn(DYV);case'+':return add(D(a),D(b));case'-':return sub(D(a),D(b));case'neg':return neg(D(a));case'*':return add(mul(D(a),b),mul(a,D(b)));
+case'/':return div(sub(mul(D(a),b),mul(a,D(b))),pw(b,nn(2)));case'^':if(!hx(b))return mul(mul(b,pw(a,sub(b,nn(1)))),D(a));if(!hx(a))return mul(mul(t,a[0]=='n'&&a[2]=='e'?nn(1):['f','ln',a]),D(b));return mul(t,add(mul(D(b),['f','ln',a]),div(mul(b,D(a)),a)));
+default:{const u=b,du=D(u),sq=['f','sqrt',sub(nn(1),pw(u,nn(2)))];switch(a){case'sin':return mul(['f','cos',u],du);case'cos':return neg(mul(['f','sin',u],du));case'tan':return div(du,pw(['f','cos',u],nn(2)));case'exp':return mul(t,du);case'ln':return div(du,u);case'log':return div(du,mul(u,nn(Math.LN10)));case'sqrt':return div(du,mul(nn(2),t));case'abs':return mul(div(u,t),du);case'asin':return div(du,sq);case'acos':return neg(div(du,sq));case'atan':return div(du,add(nn(1),pw(u,nn(2))));case'sinh':return mul(['f','cosh',u],du);case'cosh':return mul(['f','sinh',u],du);default:return mul(sub(nn(1),pw(t,nn(2))),du)}}}}
+function sA0(t,p=0){const w=(s,q)=>q<p?'('+s+')':s,a=t[1],b=t[2];switch(t[0]){case'n':return t[2]||(t[1]<0&&p>0?'('+g4(t[1])+')':g4(t[1]));case'x':return'x';case'+':return w(sA(a,1)+' + '+sA(b,1),1);case'-':return w(sA(a,1)+' − '+sA(b,2),1);case'*':return w(sA(a,2)+'·'+sA(b,2),2);case'/':return w(sA(a,2)+'/'+sA(b,3),2);case'^':return w(sA(a,4)+'^'+sA(b,3.5),3);case'neg':return w('−'+sA(a,2.5),2);default:return a+'('+sA(b,0)+')'}}
+function fr(v){if(Math.abs(v)<1e-12)return'0';for(let q=1;q<=5040;q++){const p=Math.round(v*q);if(Math.abs(v*q-p)<1e-9)return q==1?String(p).replace('-','−'):(p<0?'−':'')+Math.abs(p)+'/'+q}return g4(v)}
+function rts(g,a,b){const N=800,xs=[],gs=[];for(let i=0;i<=N;i++){const q=a+(b-a)*i/N;xs.push(q);gs.push(g(q))}
+const r=[],eps=(b-a)*1e-5,add=v=>{if(isFinite(v)&&!r.some(u=>Math.abs(u-v)<eps))r.push(v)};
+for(let i=0;i<=N;i++)if(gs[i]===0)add(xs[i]);
+for(let i=1;i<=N;i++){const gp=gs[i-1],gq=gs[i];if(isFinite(gp)&&isFinite(gq)&&gp*gq<0){let lo=xs[i-1],hi=xs[i],gl=gp;for(let k=0;k<60;k++){const m=(lo+hi)/2,gm=g(m);if(gm===0){lo=hi=m;break}if(gm*gl<=0)hi=m;else{lo=m;gl=gm}}const m=(lo+hi)/2;if(Math.abs(g(m))<=1e-6*(Math.abs(gp)+Math.abs(gq)))add(m)}}
+for(let i=1;i<N;i++){const A=gs[i-1],B=gs[i],C=gs[i+1];if(isFinite(A)&&isFinite(B)&&isFinite(C)&&A*C>0&&Math.abs(B)<Math.abs(A)&&Math.abs(B)<=Math.abs(C)){let lo=xs[i-1],hi=xs[i+1];const ph=.6180339887;for(let k=0;k<80;k++){const m1=hi-ph*(hi-lo),m2=lo+ph*(hi-lo);if(Math.abs(g(m1))<Math.abs(g(m2)))hi=m2;else lo=m1}const m=(lo+hi)/2;if(Math.abs(g(m))<1e-10*Math.max(1,Math.abs(A),Math.abs(C)))add(m)}}
+return r.sort((p,q)=>p-q)}
+let tay=false,lg=false;
+function tayCalc(x,X,Y,x0,x1,a,fin){const o=$('#ltx'),t=par($('#lfx').value),n=+$('#lnn').value;$('#lnv').textContent=n;if(!t||!fin){o.innerHTML='<div>Нужны функция и конечная точка a.</div>';return}
+let d=t,c=[],fa=1;for(let k=0;k<=n;k++){c.push(ev2(d,a)/fa);d=D(d);fa*=k+1}
+if(c.some(v=>!isFinite(v))){o.innerHTML='<div>В точке a функция или её производные не определены: разложение невозможно.</div>';return}
+x.beginPath();let on=false;for(let i=0;i<=400;i++){const s=x0+(x1-x0)*i/400,y=c.reduceRight((q,v)=>q*(s-a)+v,0);if(!isFinite(y)||Math.abs(y)>1e6){on=false;continue}on?x.lineTo(X(s),Y(y)):x.moveTo(X(s),Y(y));on=true}x.strokeStyle='#1D9E75';x.lineWidth=2.2;x.setLineDash([6,4]);x.stroke();x.setLineDash([]);
+const bs=a==0?'x':`(x − ${g4(a)})`,sup=k=>String(k).replace(/\d/g,m=>'⁰¹²³⁴⁵⁶⁷⁸⁹'[m]);let s='';
+c.forEach((v,k)=>{if(Math.abs(v)<1e-12)return;const f=fr(Math.abs(v)),mg=(k&&f=='1')?'':f,term=k==0?f:mg+(mg?'·':'')+bs+(k>1?sup(k):'');s+=(s?(v<0?' − ':' + '):(v<0?'−':''))+term});
+o.innerHTML=`<div>f(x) = ${s||'0'} + R<sub>${n}</sub>(x)</div><div>R<sub>${n}</sub>(x) = f<sup>(${n+1})</sup>(ξ)/${n+1}!·(x − a)<sup>${n+1}</sup> — остаток в форме Лагранжа</div><div>c<sub>k</sub> = f<sup>(k)</sup>(a)/k!: ${c.map(fr).join('; ')}</div><div>Зелёный пунктир на графике — многочлен P<sub>${n}</sub>.</div>`}
+$('#ltb').onclick=()=>{tay=!tay;$('#ltb').classList.toggle('on',tay);$('#ltb').textContent=tay?'Скрыть ряд':'Разложить в ряд';ldraw()};$('#lnn').addEventListener('input',ldraw);
+function cls(t,a){return cls2(t,a)}
+function clsOld(t,a){const pr=isFinite(a)?[a+1e-7,a-1e-7]:[(a>0?1:-1)*1e7];let v=NaN;for(const p of pr){const y=ev2(t,p);if(!isNaN(y)){v=y;break}}return isNaN(v)?'?':Math.abs(v)<1e-5?'0':Math.abs(v)>1e5?'∞':Math.abs(v-1)<1e-5?'1':'c'}
+function est(U,V,a){const fin=isFinite(a),sg=a>0?1:-1,pr=fin?[a+1e-6,a-1e-6]:[sg*1e6,sg*1e9],r=pr.map(p=>ev2(U,p)/ev2(V,p)).filter(v=>!isNaN(v));if(!r.length)return null;
+if(Math.abs(r[0])>1e5){if(r.length>1&&Math.abs(r[1])>1e5&&Math.sign(r[0])!=Math.sign(r[1]))return null;return Math.sign(r[0])*Infinity}
+if(!fin){if(r.length<2)return Math.abs(r[0])<1e-5?0:r[0];if(Math.abs(r[1]-r[0])<1e-3*(1+Math.abs(r[0])))return Math.abs(r[1])<1e-5?0:r[1];if(Math.abs(r[1])<1e-4&&Math.abs(r[1])<Math.abs(r[0]))return 0;if(Math.abs(r[0])>5&&Math.abs(r[1])>1.3*Math.abs(r[0]))return Math.sign(r[1])*Infinity;return null}
+return r.length==1||Math.abs(r[0]-r[1])<1e-3*(1+Math.abs(r[0]))?(Math.abs(r[0])<1e-5?0:r[0]):null}
+$('#llb').onclick=()=>{const o=$('#llo'),a=pa($('#la').value),t=par($('#lfx').value);if(!t||isNaN(a)){o.innerHTML='<div>Не удалось разобрать f(x) или точку a.</div>';return}
+const k=t[0],A1=Array.isArray(t[1])?cls(t[1],a):'',A2=Array.isArray(t[2])?cls(t[2],a):'',fl=r=>r==null?'не удалось оценить':g4(r),sh=(u,v)=>`<span class="fr"><span>${sA(u)}</span><span>${sA(v)}</span></span>`;let U=null,V=null,pst=false,h='',one=nn(1);
+if(k=='/'){U=t[1];V=t[2];h+=`<div>Вид: ${A1} / ${A2}</div>`}
+else if(k=='*'&&A1+A2!='c'&&((A1=='0'&&A2=='∞')||(A1=='∞'&&A2=='0'))){h+='<div>Вид: 0·∞. Перепишем u·v = u / (1/v).</div>';const z0=A1=='0'?t[1]:t[2],inf=A1=='0'?t[2]:t[1];U=z0;V=div(one,inf)}
+else if(k=='-'&&A1=='∞'&&A2=='∞'){h+='<div>Вид: ∞−∞. Приводим к общему знаменателю: u − v = (1/v − 1/u) / (1/(u·v)).</div>';U=sub(div(one,t[2]),div(one,t[1]));V=div(one,mul(t[1],t[2]))}
+else if(k=='^'&&((A1=='1'&&A2=='∞')||(A1=='0'&&A2=='0')||(A1=='∞'&&A2=='0'))){h+=`<div>Вид: ${A1}^${A2}. Переписываем u^v = e^(v·ln u), то есть ${sA(t)} = e^(${sA(t[2],0)}·ln(${sA(t[1])})). Ищем предел показателя L = v·ln u = ln u / (1/v), затем ответ e^L.</div>`;U=['f','ln',t[1]];V=div(one,t[2]);pst=true}
+if(!U){const r=est(t,one,a);o.innerHTML=h+`<div>Неопределённости типа 0/0 или ∞/∞ нет: предел считается подстановкой, lim ≈ <b>${fl(r)}</b></div>`;return}
+let res=null;for(let it=1;it<=6;it++){const cu=cls(U,a),cv=cls(V,a),ok=(cu=='0'&&cv=='0')||(cu=='∞'&&cv=='∞');h+=`<div>${it>1?'Шаг '+it+': ':''}${sh(U,V)} — вид ${cu}/${cv}</div>`;
+if(!ok||it==6){res=est(U,V,a);h+=`<div>${ok?'':'Неопределённости нет. '}Предел равен <b>${fl(res)}</b></div>`;break}
+U=D(U);V=D(V);h+=`<div>Лопиталь: (u′)/(v′) = ${sh(U,V)}</div>`;const r2=est(U,V,a);if(r2!=null){res=r2;h+=`<div>Предел отношения производных существует: lim (u′/v′) = <b>${fl(r2)}</b> (по таблице значений). По правилу Лопиталя он равен пределу исходного отношения.</div>`;break}}
+if(pst&&res!=null)h+=`<div>Исходный предел = e<sup>L</sup> = <b>${g4(Math.exp(res))}</b></div>`;o.innerHTML=h};
+const DP=[['x³ − 3x','x^3-3*x','-3','3','-2','2'],['sin x','sin(x)','-4','4','0','pi'],['e^(−x²) (Ролль)','exp(-x^2)','-3','3','-2','2'],['x·eˣ','x*exp(x)','-4','2','-3','1'],['ln x / x','ln(x)/x','0.2','6','1','5'],['|x| (нет производной в 0)','abs(x)','-2','2','-1','2']];
+function ddraw(){if(impMode()){ndraw();return}const S0=csetup('#dc');if(!S0)return;const{x,w:w0,h:h0,mu,gr}=S0,t=par($('#dfx').value),xa=pv($('#dx0').value),xb=pv($('#dx1').value),o=$('#dout');
+if(!t||isNaN(xa)||isNaN(xb)||xa>=xb){o.innerHTML='<div>Не удалось разобрать f(x) или границы.</div>';return}
+const D1=D(t),D2=D(D1),sl=$('#dt');sl.min=xa;sl.max=xb;const x0=Math.max(xa,Math.min(xb,+sl.value)),f=u=>ev2(t,u),f1=u=>ev2(D1,u);$('#dtv').textContent=g4(x0);const stc=c=>{const d=(xb-xa)*1e-4,l=f1(c-d),r=f1(c+d);return l<0&&r>0?'минимум':l>0&&r<0?'максимум':isFinite(l+r)?'не экстремум: f′ не меняет знак':'тип определить не удалось'};
+const S=[],ys=[];for(let i=0;i<=500;i++){const u=xa+(xb-xa)*i/500,y=f(u),y1=f1(u);S.push([u,y,y1]);[y,y1].forEach(v=>{if(isFinite(v)&&Math.abs(v)<1e6)ys.push(v)})}ys.sort((p,q)=>p-q);
+let y0=0,y1=1;if(ys.length){y0=ys[Math.floor(.04*(ys.length-1))];y1=ys[Math.floor(.96*(ys.length-1))]}y0=Math.min(y0,0);y1=Math.max(y1,0);if(y1-y0<1e-9){y0-=1;y1+=1}const py=(y1-y0)*.15;y0-=py;y1+=py;
+const X=u=>44+(u-xa)/(xb-xa)*(w0-56),Y=v=>h0-26-(v-y0)/(y1-y0)*(h0-38);
+let st=nic(xb-xa);x.fillStyle=mu;x.textAlign='center';for(let u=Math.ceil(xa/st)*st;u<=xb+1e-9;u+=st){lnx(x,[X(u),12],[X(u),h0-26],gr);x.fillText(g4(u),X(u),h0-9)}
+st=nic(y1-y0);x.textAlign='right';for(let u=Math.ceil(y0/st)*st;u<=y1+1e-9;u+=st){lnx(x,[44,Y(u)],[w0-12,Y(u)],gr);x.fillText(g4(u),38,Y(u)+4)}
+if(y0<0&&y1>0)lnx(x,[44,Y(0)],[w0-12,Y(0)],mu,1.4);if(xa<0&&xb>0)lnx(x,[X(0),12],[X(0),h0-26],mu,1.4);
+const cv=(k,da)=>{x.beginPath();let on=false;S.forEach(s=>{const v=s[k];if(!isFinite(v)||Math.abs(v)>1e6){on=false;return}on?x.lineTo(X(s[0]),Y(v)):x.moveTo(X(s[0]),Y(v));on=true});x.setLineDash(da);x.strokeStyle=k==1?'#7F77DD':'#1D9E75';x.lineWidth=k==1?2.2:1.6;x.stroke();x.setLineDash([])};
+const tl=(c,m,col,da)=>lnx(x,[X(xa),Y(f(c)+m*(xa-c))],[X(xb),Y(f(c)+m*(xb-c))],col,1.6,da);let th='';
+if(lg){const a=pv($('#da').value),b=pv($('#db').value);if(!(a<b)||!isFinite(f(a)+f(b)))th='<div>Укажите a &lt; b в области определения.</div>';else{const fa=f(a),fb=f(b),tm=$('#dtm').value,gg=par($('#dgx').value),Dg=gg?D(gg):null,cau=tm=='cauchy'&&gg,gba=cau?ev2(gg,b)-ev2(gg,a):b-a,m=(tm=='rolle'||tm=='fermat')?0:(fb-fa)/gba,cs=isFinite(m)?(cau?rts(c=>f1(c)-m*ev2(Dg,c),a,b):rts(c=>f1(c)-m,a,b)):[];if(tm=='lagrange')tl(a,m,mu,[]);
+cs.forEach(c=>{tl(c,f1(c),'#D85A30',[5,4]);const q=[X(c),Y(f(c))];x.beginPath();x.fillStyle='#D85A30';x.arc(q[0],q[1],4,0,7);x.fill()});
+if(tm=='cauchy'&&!gg)th='<div>Не удалось разобрать g(x).</div>';
+else if(cau&&Math.abs(gba)<1e-12)th=`<div>g(a) = g(b) = ${g4(ev2(gg,a))}: знаменатель g(b) − g(a) равен нулю, теорема Коши в форме f′(c)/g′(c) = (f(b) − f(a))/(g(b) − g(a)) неприменима.</div>`;
+else{const eq=Math.abs(fa-fb)<1e-9*(1+Math.abs(fa)),hd=tm=='cauchy'?`<div>f(a) = ${g4(fa)}, f(b) = ${g4(fb)}, g(a) = ${g4(ev2(gg,a))}, g(b) = ${g4(ev2(gg,b))}; m = (f(b) − f(a))/(g(b) − g(a)) = ${g4(m)}</div>`:tm=='lagrange'?`<div>f(a) = ${g4(fa)}, f(b) = ${g4(fb)}, m = (f(b) − f(a))/(b − a) = ${g4(m)}</div>`:`<div>f(a) = ${g4(fa)}, f(b) = ${g4(fb)}</div>`,
+nt=tm=='rolle'?(eq?'<div>f(a) = f(b): условие теоремы Ролля выполнено, ищем c с f′(c) = 0.</div>':'<div>f(a) ≠ f(b): условие теоремы Ролля не выполнено, существование c не гарантировано. Для справки, точки с f′(c) = 0 на отрезке:</div>'):tm=='lagrange'&&eq?'<div>f(a) = f(b): это частный случай — теорема Ролля, f′(c) = 0.</div>':tm=='fermat'?'<div>Теорема Ферма: в точке локального экстремума, где f дифференцируема, f′(c) = 0 (это необходимое условие, но не достаточное).</div>':'',
+lb=tm=='cauchy'?'f′(c) = m·g′(c), то есть f′(c)/g′(c) = m':tm=='lagrange'?'f′(c) = m':'f′(c) = 0';
+th=hd+nt+(cs.length?`<div>${lb} при c ≈ ${cs.map(c=>g4(c)+(tm=='fermat'?' ('+stc(c)+')':'')).join('; ')}${tm=='lagrange'||tm=='cauchy'?' (касательные параллельны секущей)':''}</div>`:'<div>Подходящих c не нашлось: проверьте непрерывность на [a, b] и дифференцируемость на (a, b).</div>')}}}
+$('#dth').innerHTML=th;cv(2,[5,4]);cv(1,[]);
+const m0=f1(x0);if(isFinite(m0)&&isFinite(f(x0))){tl(x0,m0,'#BA7517',[]);const q=[X(x0),Y(f(x0))];x.beginPath();x.fillStyle='#BA7517';x.arc(q[0],q[1],5,0,7);x.fill()}
+const cr2=rts(f1,xa,xb);
+o.innerHTML=`<div>f′(x) = ${sA(D1)}</div><div>f″(x) = ${sA(D2)}</div><div style="margin-top:6px">x₀ = ${g4(x0)}: f(x₀) = ${g4(f(x0))}, f′(x₀) = ${g4(m0)}</div><div>Касательная: y = ${g4(f(x0))} + ${q(m0)}·(x − ${q(x0)})</div><div>Направляющий вектор s = (1; ${g4(m0)}), нормаль n = (${g4(-m0)}; 1): ⟨s, n⟩ = 1·${q(-m0)} + ${q(m0)}·1 = 0</div><div style="margin-top:6px">Стационарные точки (f′ = 0, Теорема Ферма): ${cr2.length?cr2.map(c=>'x ≈ '+g4(c)+' ('+stc(c)+')').join('; '):'нет'}</div>`;dsolve(t)}
+$('#dp').innerHTML=DP.map((p,i)=>`<option value="${i}">${p[0]}</option>`).join('');
+function setD(i){const p=DP[i];$('#dfx').value=p[1];$('#dx0').value=p[2];$('#dx1').value=p[3];$('#da').value=p[4];$('#db').value=p[5];$('#dt').value=(+p[2]+ +p[3])/2;lg=false;$('#dl').classList.remove('on')}setD(0);
+$('#dp').onchange=()=>{setD(+$('#dp').value);ddraw()};['dfx','dx0','dx1','dt','da','db'].forEach(i=>$('#'+i).addEventListener('input',ddraw));
+$('#dl').onclick=()=>{lg=true;$('#dl').classList.add('on');ddraw()};new ResizeObserver(()=>ddraw()).observe($('#dc').parentElement);
+function stp(t,d,out){const pad='&nbsp;&nbsp;&nbsp;'.repeat(d),u=t[1],v=t[2],S=sA,L=s=>out.push(`<div>${pad}• ${s}</div>`);
+switch(t[0]){case'n':L(`(${S(t)})′ = 0 — производная константы`);return;case'x':L('(x)′ = 1');return;
+case'neg':L(`(−u)′ = −u′, u = ${S(u)}`);stp(u,d+1,out);return;
+case'+':case'-':L(`Правило суммы: (u ${t[0]=='+'?'+':'−'} v)′ = u′ ${t[0]=='+'?'+':'−'} v′, u = ${S(u)}, v = ${S(v)}`);stp(u,d+1,out);stp(v,d+1,out);return;
+case'*':if(!hx(u)||!hx(v)){const c=hx(u)?v:u,w=hx(u)?u:v;L(`Константа выносится: (c·w)′ = c·w′, c = ${S(c)}, w = ${S(w)}`);stp(w,d+1,out);return}
+L(`Правило произведения: (u·v)′ = u′·v + u·v′, u = ${S(u)}, v = ${S(v)}`);stp(u,d+1,out);stp(v,d+1,out);return;
+case'/':if(!hx(v)){L(`(u/c)′ = u′/c, c = ${S(v)}`);stp(u,d+1,out);return}L(`Правило частного: (u/v)′ = (u′v − uv′)/v², u = ${S(u)}, v = ${S(v)}`);stp(u,d+1,out);stp(v,d+1,out);return;
+case'^':if(!hx(v)){if(u[0]=='x')L(`Степенная функция: (xⁿ)′ = n·xⁿ⁻¹, n = ${S(v)}`);else{L(`Степень сложной функции: (uⁿ)′ = n·uⁿ⁻¹·u′, u = ${S(u)}, n = ${S(v)}`);stp(u,d+1,out)}return}
+if(!hx(u)){L(`Показательная функция: (aᵛ)′ = aᵛ·ln a·v′, a = ${S(u)}, v = ${S(v)}`);stp(v,d+1,out);return}
+L(`Логарифмическое дифференцирование: (uᵛ)′ = uᵛ·(v′·ln u + v·u′/u), u = ${S(u)}, v = ${S(v)}`);stp(u,d+1,out);stp(v,d+1,out);return;
+default:{const R={sin:'(sin u)′ = cos u·u′',cos:'(cos u)′ = −sin u·u′',tan:'(tg u)′ = u′/cos²u',exp:'(eᵘ)′ = eᵘ·u′',ln:'(ln u)′ = u′/u',log:'(lg u)′ = u′/(u·ln 10)',sqrt:'(√u)′ = u′/(2√u)',abs:'(|u|)′ = (u/|u|)·u′',asin:'(arcsin u)′ = u′/√(1 − u²)',acos:'(arccos u)′ = −u′/√(1 − u²)',atan:'(arctg u)′ = u′/(1 + u²)',sinh:'(sh u)′ = ch u·u′',cosh:'(ch u)′ = sh u·u′',tanh:'(th u)′ = (1 − th²u)·u′'},w=v,ch=w[0]!='x';
+L(`${R[u]}, u = ${S(w)} — ${ch?'цепное правило':'табличная формула'}`);if(ch)stp(w,d+1,out)}}}
+function dsolve(t){const n=+$('#dor').value;let h='';if($('#dlg').checked&&lgHas(t)){h+=lgNote(t);t=lgT(t)}let g=t;for(let k=1;k<=n;k++){const out=[],r=D(g);stp(g,0,out);h+=`<div><b>${k==1?'Находим f′(x)':'Шаг '+k+': производная от прошлого результата'}</b>, функция: ${sA(g)}</div>`+out.join('')+`<div>Итог: <b>${sA(r)}</b></div><div style="margin-bottom:8px"></div>`;g=r}
+$('#dsol').innerHTML='<div class="hint" style="margin:0 0 8px">Алгоритм: разбираем выражение сверху вниз, для каждой части применяем табличную формулу или правило (суммы, произведения, частного, цепное), затем собираем результат и упрощаем.</div>'+h}
+const FT=[['— выбрать —',''],['степень: (xⁿ)′ = n·xⁿ⁻¹','x^5'],['синус: (sin x)′ = cos x','sin(x)'],['косинус: (cos x)′ = −sin x','cos(x)'],['экспонента: (eˣ)′ = eˣ','exp(x)'],['логарифм: (ln x)′ = 1/x','ln(x)','0.2','6'],['арктангенс: (arctg x)′ = 1/(1 + x²)','atan(x)'],['корень: (√x)′ = 1/(2√x)','sqrt(x)','0.05','6'],['сумма: (u + v)′ = u′ + v′','x^2+sin(x)'],['произведение: (uv)′ = u′v + uv′','x^2*sin(x)'],['частное: (u/v)′ = (u′v − uv′)/v²','sin(x)/x','0.2','10'],['цепное правило: (f(g))′ = f′(g)·g′','sin(x^2+1)'],['показательно-степенная: (uᵛ)′','x^x','0.1','3']];
+$('#dfm').innerHTML=FT.map((p,i)=>`<option value="${i}">${p[0]}</option>`).join('');
+$('#dfm').onchange=()=>{const p=FT[+$('#dfm').value];if(!p[1])return;const xa=p[2]||'-3',xb=p[3]||'3';$('#dfx').value=p[1];$('#dx0').value=xa;$('#dx1').value=xb;$('#dt').value=(+xa+ +xb)/2;lg=false;$('#dl').classList.remove('on');ddraw()};
+$('#dor').addEventListener('input',ddraw);
+const RS=['x','e','pi','sin','cos','tan','exp','ln','log','sqrt','abs','asin','acos','atan','sinh','cosh','tanh'],VARS=Object.create(null);let VL=[];
+function vsync(){for(const k in VARS)delete VARS[k];VL.forEach(r=>{const n=String(r.n).trim().toLowerCase();if(!/^[a-z]+$/.test(n)||RS.includes(n)||n in VARS)return;try{new Function('const '+n+'=1')}catch(_){return}const v=Number(String(r.v).replace(',','.'));VARS[n]=isNaN(v)?0:v})}
+function vbuild(){$('#vbox').style.display=VL.length?'':'none';$('#vl').innerHTML=VL.map((r,i)=>`<div class="f" data-i="${i}" style="margin:4px 0"><input class="vn" value="${E(r.n)}" size="3"> =<input type="range" class="vs" min="-10" max="10" step="0.1" value="${r.v}"><input class="vv" value="${r.v}" size="5"><button class="vx">×</button></div>`).join('')}
+$('#vl').addEventListener('input',e=>{const rw=e.target.closest('[data-i]'),r=VL[+rw.dataset.i],c=e.target.className;if(c=='vn')r.n=e.target.value;else{r.v=e.target.value;rw.querySelector(c=='vs'?'.vv':'.vs').value=e.target.value}vsync();redraw()});
+$('#vl').addEventListener('click',e=>{if(e.target.className=='vx'){VL.splice(+e.target.closest('[data-i]').dataset.i,1);vbuild();vsync();redraw()}});
+$('#va').onclick=()=>{const L='kmnpqrstuvwyzabcdfgh',n=[...L].find(c=>!VL.some(r=>r.n==c))||'t'+VL.length;VL.push({n,v:1});vbuild();vsync();redraw()};vsync();vbuild();
+const oldLL=$('#llb').onclick,fl2=r=>r==null?'не найден':g4(r);
+function sqz(){const o=$('#llo'),a=pa($('#la').value),f=par($('#lfx').value),g=par($('#lgx').value),h=par($('#lh2').value);if(!f||!g||!h||isNaN(a)){o.innerHTML='<div>Введите f, g, h и точку a.</div>';return}
+const one=nn(1),la=est(g,one,a),lb=est(h,one,a),pr=isFinite(a)?[a+1e-3,a-1e-3,a+1e-2,a-1e-2]:[1e3,2e3].map(s=>s*(a>0?1:-1)),ok=pr.every(t=>{const y=ev2(f,t),u=ev2(g,t),w=ev2(h,t);return isNaN(y)||(u<=y+1e-9&&y<=w+1e-9)});
+o.innerHTML=`<div>Теорема о сжатии: если g(x) ≤ f(x) ≤ h(x) вблизи a и lim g = lim h = L, то lim f = L.</div><div>Неравенство g ≤ f ≤ h в пробных точках: ${ok?'выполнено ✓':'<b>нарушено ✗</b>'}</div><div>lim g = ${fl2(la)}, lim h = ${fl2(lb)}</div>`+(ok&&la!=null&&lb!=null&&Math.abs(la-lb)<1e-3?`<div>Значит, lim f = <b>${g4(la)}</b></div>`:'<div>Теорема не даёт ответа: неравенство нарушено или пределы g и h разные.</div>')}
+$('#llb').onclick=()=>{const t=$('#llt').value;if(t=='sq')sqz();else if(t=='tay'){if(!tay)$('#ltb').click();$('#llo').innerHTML='<div>Ряд Тейлора показан ниже и на графике.</div>'}else oldLL()};
+['dtm','dgx'].forEach(i=>$('#'+i).addEventListener('input',ddraw));
+let MM=[['2','1','-1','8'],['-3','-1','2','-11'],['-2','1','2','-3']];
+const mt=(M,dt)=>'<span class="mx'+(dt?' dt':'')+'"><table>'+M.map(r=>'<tr>'+r.map(v=>'<td>'+(typeof v=='number'?frh(v):v)+'</td>').join('')+'</tr>').join('')+'</table></span>';
+function rref(M,st){const A=M.map(r=>r.slice()),R=A.length,C=A[0].length,pv2=[],cp=()=>A.map(r=>r.slice());let r=0,sw=0,df=1;
+for(let c=0;c<C&&r<R;c++){let k=r;for(let i=r+1;i<R;i++)if(Math.abs(A[i][c])>Math.abs(A[k][c]))k=i;if(Math.abs(A[k][c])<1e-10)continue;
+if(k!=r){[A[k],A[r]]=[A[r],A[k]];sw++;st&&st.push(['R'+(r+1)+' ↔ R'+(k+1),cp()])}
+const pp=A[r][c];if(Math.abs(pp-1)>1e-12){A[r]=A[r].map(v=>v/pp);df*=pp;st&&st.push(['R'+(r+1)+' ← R'+(r+1)+' / '+fr(pp),cp()])}
+for(let i=0;i<R;i++)if(i!=r&&Math.abs(A[i][c])>1e-12){const m=A[i][c];A[i]=A[i].map((v,j)=>v-m*A[r][j]);st&&st.push(['R'+(i+1)+' ← R'+(i+1)+' − ('+fr(m)+')·R'+(r+1),cp()])}pv2.push(c);r++}return{A,pv:pv2,rank:r,sw,df}}
+const detf=A=>{const r=rref(A);return r.rank<A.length?0:r.df*(r.sw%2?-1:1)},sts=st=>st.map(([t,m])=>`<div>${t}</div>${mt(m)}`).join('');
+function mgrid(){const R=+$('#mrr').value,C=+$('#mcc').value,N=[];for(let i=0;i<R;i++){N.push([]);for(let j=0;j<C;j++)N[i].push((MM[i]&&MM[i][j])??(i==j?'1':'0'))}MM=N;$('#mg').innerHTML='<span class="mx"><table>'+MM.map((r,i)=>'<tr>'+r.map((v,j)=>`<td style="padding:2px;border:0"><input class="mcl" data-i="${i}" data-j="${j}" value="${E(v)}" style="width:60px;text-align:center"></td>`).join('')+'</tr>').join('')+'</table></span>'}
+function mdraw(){const R=MM.length,C=MM[0].length,M=MM.map(r=>r.map(s=>{const v=p(s);return isNaN(v)?0:v})),op=$('#mop').value,o=$('#mout'),sqr=R==C;let h='';
+if(op=='tr'){h='<div>A<sup>T</sup> (строки становятся столбцами):</div>'+mt(M[0].map((_,j)=>M.map(r=>r[j])))}
+else if(op=='det'||op=='inv'){if(!sqr)h='<div>Нужна квадратная матрица (строк равно столбцов).</div>';else if(op=='det'){const st=[],r=rref(M,st),d=r.rank<R?0:r.df*(r.sw%2?-1:1);h=expd(M)+(R==2?`<div>Формула 2×2: a·d − b·c = ${fr(M[0][0])}·${fr(M[1][1])} − ${fr(M[0][1])}·${fr(M[1][0])}</div>`:'')+'<div>Метод Гаусса: приводим к единичной. Деление строки на p умножает определитель на p, перестановка строк меняет знак, вычитание кратной строки не меняет.</div>'+sts(st)+`<div>det A = ${r.rank<R?'0 (ранг меньше '+R+')':fr(r.df)+' · (−1)^'+r.sw+' = '}<b>${fr(d)}</b></div>`}
+else{const I=M.map((r,i)=>r.map((_,j)=>i==j?1:0)),st=[],r=rref(M.map((row,i)=>row.concat(I[i])),st);const ok=r.pv.slice(0,R).every((c,i)=>c==i)&&r.pv.length>=R;h='<div>Метод Гаусса–Жордана: [A | E] → [E | A<sup>−1</sup>]</div>'+sts(st)+(ok?'<div>A<sup>−1</sup> =</div>'+mt(r.A.map(row=>row.slice(R))):'<div>Матрица вырождена (det = 0), обратной нет.</div>')}}
+else if(op=='rank'){const st=[],r=rref(M,st);h='<div>Приводим к ступенчатому виду; ранг — число ненулевых строк.</div>'+sts(st)+`<div>Ведущие столбцы: ${r.pv.map(c=>c+1).join(', ')||'нет'}. rank A = <b>${r.rank}</b></div>`}
+else if(C<2)h='<div>Нужно минимум 2 столбца (A | b).</div>';
+else{const n=C-1;if(op=='cramer'){if(R!=n)h='<div>Крамер: нужно строк равно числу неизвестных (столбцов минус 1).</div>';else{const A=M.map(r=>r.slice(0,n)),d=detf(A);h=`<div>Δ = det A = <b>${fr(d)}</b></div>`;if(Math.abs(d)<1e-10)h+='<div>Δ = 0: метод Крамера неприменим (решения нет или их бесконечно много, воспользуйтесь Гауссом).</div>';else for(let i=0;i<n;i++){const B=A.map((r,k)=>r.map((v,j)=>j==i?M[k][n]:v)),di=detf(B);h+=`<div>Δ<sub>${i+1}</sub> (столбец ${i+1} заменён на b) = ${fr(di)}, x<sub>${i+1}</sub> = Δ<sub>${i+1}</sub>/Δ = <b>${fr(di/d)}</b></div>`}}}
+else{const st=[],r=rref(M,st);let bad=r.pv.includes(n);h='<div>Метод Гаусса (Гаусса–Жордана) на расширенной матрице [A | b]:</div>'+sts(st);
+if(bad)h+='<div>Есть строка 0 = c ≠ 0: система <b>несовместна</b> (rank A &lt; rank [A | b]).</div>';
+else if(r.rank==n)h+='<div>rank A = rank [A | b] = n: единственное решение:</div>'+r.pv.map((c,i)=>`<div>x<sub>${c+1}</sub> = <b>${fr(r.A[i][n])}</b></div>`).join('');
+else{const fv=[...Array(n).keys()].filter(j=>!r.pv.includes(j));h+=`<div>rank = ${r.rank} &lt; n = ${n}: бесконечно много решений. Свободные: ${fv.map(j=>'x<sub>'+(j+1)+'</sub>').join(', ')}</div>`+r.pv.map((c,i)=>`<div>x<sub>${c+1}</sub> = ${fr(r.A[i][n])}${fv.map(j=>Math.abs(r.A[i][j])<1e-12?'':(r.A[i][j]>0?' − ':' + ')+(Math.abs(Math.abs(r.A[i][j])-1)<1e-12?'':fr(Math.abs(r.A[i][j]))+'·')+'x<sub>'+(j+1)+'</sub>').join('')}</div>`).join('')}}}
+o.innerHTML=mhead(M)+h;mvis2(M,op)}
+function mvis(M,op){const S0=csetup('#mc');if(!S0)return;const{x,w:w0,h:h0,mu,gr}=S0,R=M.length,C=M[0].length,sys=(op=='gauss'||op=='cramer')&&R==2&&C==3,pl=R==2&&C==2&&op!='gauss'&&op!='cramer';
+if(!sys&&!pl){x.fillStyle=mu;x.textAlign='center';x.fillText('Рисунок: матрица 2×2 или система из 2 уравнений',w0/2,h0/2);return}
+let sol=null;if(sys){const r=rref(M);if(r.rank==2&&!r.pv.includes(2))sol=[r.A[0][2],r.A[1][2]]}
+const vs2=pl?[M[0][0],M[1][0],M[0][1],M[1][1],M[0][0]+M[0][1],M[1][0]+M[1][1]]:[4],ext=Math.max(4,...vs2.map(Math.abs),...(sol?sol.map(v=>Math.abs(v)*1.4):[0]))*1.2,k=Math.min(w0,h0)/2/ext,cx=w0/2,cy=h0/2,Pp=z=>[cx+k*z[0],cy-k*z[1]],st=nic(2*ext);
+x.fillStyle=mu;for(let t=-Math.floor(ext/st)*st;t<=ext;t+=st){lnx(x,Pp([t,-ext]),Pp([t,ext]),gr);lnx(x,Pp([-ext,t]),Pp([ext,t]),gr);if(Math.abs(t)>1e-9){x.textAlign='center';x.fillText(g4(t),Pp([t,0])[0],cy+14);x.textAlign='right';x.fillText(g4(t),cx-6,Pp([0,t])[1]+4)}}
+lnx(x,Pp([-ext,0]),Pp([ext,0]),mu,1.4);lnx(x,Pp([0,-ext]),Pp([0,ext]),mu,1.4);
+if(pl){const a1=[M[0][0],M[1][0]],a2=[M[0][1],M[1][1]],s=[a1[0]+a2[0],a1[1]+a2[1]];x.beginPath();[[0,0],a1,s,a2].forEach((z,i)=>{const q=Pp(z);i?x.lineTo(q[0],q[1]):x.moveTo(q[0],q[1])});x.closePath();x.fillStyle='rgba(127,119,221,.15)';x.fill();
+const AR=(z,c)=>{lnx(x,Pp([0,0]),Pp(z),c,2.5);const t=Pp(z),g=Math.atan2(t[1]-cy,t[0]-cx);x.beginPath();x.fillStyle=c;x.moveTo(t[0],t[1]);x.lineTo(t[0]-9*Math.cos(g-.4),t[1]-9*Math.sin(g-.4));x.lineTo(t[0]-9*Math.cos(g+.4),t[1]-9*Math.sin(g+.4));x.closePath();x.fill();x.textAlign='left';x.fillText(c=='#7F77DD'?'a₁':'a₂',t[0]+8,t[1]-8)};AR(a1,'#7F77DD');AR(a2,'#1D9E75');x.fillStyle=mu;x.textAlign='left';x.fillText('S = |det A| = '+g4(Math.abs(a1[0]*a2[1]-a1[1]*a2[0])),10,20)}
+else{[['#7F77DD',0],['#1D9E75',1]].forEach(([c,i])=>{const a=M[i][0],b=M[i][1],d=M[i][2];if(Math.abs(b)>1e-9)lnx(x,Pp([-ext,(d+a*ext)/b]),Pp([ext,(d-a*ext)/b]),c,2.2);else if(Math.abs(a)>1e-9)lnx(x,Pp([d/a,-ext]),Pp([d/a,ext]),c,2.2)});if(sol){const q=Pp(sol);x.beginPath();x.fillStyle='#D85A30';x.arc(q[0],q[1],5,0,7);x.fill();x.textAlign='left';x.fillText('('+g4(sol[0])+'; '+g4(sol[1])+')',q[0]+8,q[1]-8)}}}
+$('#mrr').innerHTML=$('#mcc').innerHTML=[1,2,3,4,5,6].map(i=>`<option>${i}</option>`).join('');$('#mrr').value=3;$('#mcc').value=4;mgrid();
+['mrr','mcc'].forEach(i=>$('#'+i).addEventListener('input',()=>{mgrid();mdraw()}));$('#mop').addEventListener('input',mdraw);$('#mg').addEventListener('input',e=>{if(e.target.className=='mcl'){MM[+e.target.dataset.i][+e.target.dataset.j]=e.target.value;mdraw()}});new ResizeObserver(()=>mdraw()).observe($('#mc').parentElement);
+function nz(s){if(s.includes('\\')||/[{}]/.test(s))s=ltx(s);return s.replace(/×|·/g,'*').replace(/÷/g,'/').replace(/−|–/g,'-').replace(/²/g,'^2').replace(/³/g,'^3').replace(/π/g,'pi').replace(/∞/g,'inf').replace(/√/g,'sqrt').replace(/sin⁻¹/gi,'asin').replace(/cos⁻¹/gi,'acos').replace(/tan⁻¹/gi,'atan').replace(/arcsin/gi,'asin').replace(/arccos/gi,'acos').replace(/arctg|arctan/gi,'atan').replace(/\btg\b/gi,'tan')}
+FN.log=Math.log10;
+const FI=['ifx','lfx','dfx','lgx','lh2','dgx'];
+function diag(s){s=String(s).trim();if(!s)return'Введите выражение.';const a=par(s);if(a)return'<b style="color:var(--ac)">Вид в тексте</b><span class="rv">'+sA(a)+'</span>';const t=nz(s).toLowerCase();let n=0;for(const c of t){if(c=='(')n++;if(c==')')n--;if(n<0)break}
+if(n!=0)return'✗ Не сходятся скобки: проверьте ( и ).';const bad=t.match(/[^0-9a-z+\-*\/^().\s,]/);if(bad)return'✗ Недопустимый символ «'+E(bad[0])+'». Используйте клавиатуру.';
+const w=(t.match(/[a-z]+/g)||[]).find(q=>q!='x'&&q!='pi'&&q!='e'&&!FN[q]&&!(q in VARS));
+if(w){const m=Object.keys(FN).find(f=>w.startsWith(f)&&w.length>f.length);return m?`✗ «${w}»: после функции нужны скобки, напишите ${m}(...)`:`✗ Неизвестное слово «${w}». Функции: sin, cos, tan, exp, ln, log, sqrt, abs, asin, acos, atan.`}
+return'✗ Не удалось разобрать. Число и букву можно не разделять (2x), но между двумя буквами нужен * (a*x); проверьте знаки подряд.'}
+FI.forEach(id=>$('#'+id).closest('.f').insertAdjacentHTML('afterend',`<div class="hint fm" id="fm_${id}"></div>`));
+function fmtAll(){FI.forEach(id=>{const el=$('#fm_'+id);if(el&&el.offsetParent!==null){const m=(id=='dfx'&&($('#dim').checked||isImp($('#dfx').value)))?'Определено как неявная функция F(x, y) = 0':diag($('#'+id).value);el.innerHTML=m;el.style.color=m[0]=='✗'?'#D85A30':''}})}
+document.addEventListener('input',fmtAll);document.addEventListener('change',fmtAll);
+let lastIn=null;document.addEventListener('focusin',e=>{if(e.target.matches('input:not([type=range]):not([type=checkbox]):not([type=file]),textarea'))lastIn=e.target});
+function ins(s,back){const el=lastIn||$('#dfx');if(!el)return;const a=el.selectionStart??el.value.length,b=el.selectionEnd??a;el.value=el.value.slice(0,a)+s+el.value.slice(b);const ps=a+s.length-(back||0);try{el.setSelectionRange(ps,ps)}catch(_){}el.focus();el.dispatchEvent(new Event('input',{bubbles:true}))}
+const K1=[['7','7'],['8','8'],['9','9'],['÷','/'],['⌫','BS'],['4','4'],['5','5'],['6','6'],['×','*'],['(','('],['1','1'],['2','2'],['3','3'],['−','-'],[')',')'],['0','0'],['.','.'],['x','x'],['y','y'],['+','+'],['^','^'],['x²','^2'],['xⁿ','^{}',1],['a/b','\\frac{}{}',3],['√(','\\sqrt{}',1],['|x|','abs(']],
+K2=[['sin(','sin('],['cos(','cos('],['tan(','tan('],['ln(','ln('],['log(','log('],['sin⁻¹(','asin('],['cos⁻¹(','acos('],['tan⁻¹(','atan('],['exp(','exp('],['sinⁿ(','sin^()(',2],['cosⁿ(','cos^()(',2],['tanⁿ(','tan^()(',2],['sinh(','sinh('],['e','e'],['π','pi'],['∞','inf'],['Clear','CL']];
+const kh=(a,i)=>a.map((k,j)=>`<button data-g="${i}" data-k="${j}">${k[0]}</button>`).join('');
+function kbv(){$('#kg1').innerHTML=kh(K1,1);$('#kg2').innerHTML=kh(K2,2);$('#kg3').innerHTML=VL.map(r=>`<button data-g="3" data-v="${E(r.n)}">${E(r.n)}</button>`).join('')||''}
+$('#kbt').onclick=()=>{const k=$('#kb');k.style.display=k.style.display=='block'?'none':'block';if(k.style.display=='block')kbv()};
+$('#kb').addEventListener('pointerdown',e=>e.preventDefault());
+$('#kb').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;if(b.dataset.v){ins(b.dataset.v);return}const k=(b.dataset.g==2?K2:K1)[+b.dataset.k];if(k[1]=='BS'){const el=lastIn;if(!el)return;const a=el.selectionStart??el.value.length,z=el.selectionEnd??a;el.value=a!=z?el.value.slice(0,a)+el.value.slice(z):el.value.slice(0,Math.max(0,a-1))+el.value.slice(a);const ps=a!=z?a:Math.max(0,a-1);try{el.setSelectionRange(ps,ps)}catch(_){}el.focus();el.dispatchEvent(new Event('input',{bubbles:true}))}else if(k[1]=='CL'){if(lastIn){lastIn.value='';lastIn.focus();lastIn.dispatchEvent(new Event('input',{bubbles:true}))}}else ins(k[1],k[2])});
+let mAz=-105,mEl=28;
+function heat(x,M,x0,y0,cw,title,mu,fg){const mx=Math.max(1e-9,...M.flat().map(Math.abs));x.textAlign='center';x.fillStyle=mu;x.fillText(title,x0+M[0].length*cw/2,y0-8);M.forEach((r,i)=>r.forEach((v,j)=>{const a=.12+.7*Math.abs(v)/mx;x.fillStyle=Math.abs(v)<1e-9?'rgba(136,135,128,.12)':v>0?`rgba(55,138,221,${a})`:`rgba(216,90,48,${a})`;x.fillRect(x0+j*cw+1,y0+i*cw+1,cw-2,cw-2);x.fillStyle=fg;x.fillText(fr(v),x0+j*cw+cw/2,y0+i*cw+cw/2+4)}))}
+function mres(M,op){const R=M.length,C=M[0].length;if(op=='tr')return[M[0].map((_,j)=>M.map(r=>r[j])),'Aᵀ'];if(op=='inv'&&R==C){const r=rref(M.map((row,i)=>row.concat(row.map((_,j)=>i==j?1:0))));if(r.pv.slice(0,R).every((c,i)=>c==i)&&r.pv.length>=R)return[r.A.map(row=>row.slice(R)),'A⁻¹'];return[null,'A⁻¹ не существует (det = 0)']}return[rref(M).A,'ступенчатый вид']}
+function mvis2(M,op){const S0=csetup('#mc');if(!S0)return;const{x,w:w0,h:h0,mu,fg}=S0,R=M.length,C=M[0].length,vm=$('#mvm').value,geoOK=(R==2||R==3)&&['det','rank','gauss','cramer'].includes(op);
+if((vm=='geo'&&(R==2||R==3))||(vm=='auto'&&geoOK)){mgeo(S0,M,op);return}
+const[B,tt]=mres(M,op);x.font='12px system-ui,sans-serif';const tc=C+(B?B[0].length:0)+1,cw=Math.max(18,Math.min(64,(w0-30)/tc)),x0=(w0-tc*cw)/2,y0=Math.max(34,(h0-R*cw)/2);heat(x,M,x0,y0,cw,'A',mu,fg);
+if(B)heat(x,B,x0+(C+1)*cw,y0,cw,tt,mu,fg);else{x.fillStyle=mu;x.textAlign='left';x.fillText(tt,x0+(C+1)*cw,y0+14)}x.fillStyle=mu;x.textAlign='left';x.fillText('синий — положительные, оранжевый — отрицательные, серый — ноль',10,h0-10)}
+function mgeo(S0,M,op){const{x,w:w0,h:h0,mu,gr,fg}=S0,R=M.length,C=M[0].length,sys=op=='gauss'||op=='cramer',n=sys?C-1:C,CL=['#7F77DD','#1D9E75','#BA7517','#378ADD','#D4537E','#639922'],SB='₁₂₃₄₅₆';
+if(n<1){x.fillStyle=mu;x.textAlign='center';x.fillText('Нужен хотя бы один столбец A',w0/2,h0/2);return}
+const c3=j=>[M[0][j],M[1][j],R>2?M[2][j]:0],cols=[...Array(n).keys()].map(c3),b=sys?c3(n):null,ad=(u,v)=>u.map((t,i)=>t+v[i]);
+let sol=null;if(sys){const r=rref(M);if(r.rank==n&&!r.pv.includes(n))sol=r.pv.map((c,i)=>r.A[i][n])}
+const sq=!sys&&R==n&&(n==2||n==3),pts=[[0,0,0],...cols];if(b)pts.push(b);let a0=[0,0,0];if(sol)cols.forEach((c,j)=>{a0=ad(a0,c.map(t=>sol[j]*t));pts.push(a0)});if(sq)pts.push(cols.reduce(ad,[0,0,0]));
+const ext=Math.max(2,...pts.flat().map(Math.abs))*1.25,A0=R==2?0:mAz,E0=R==2?90:mEl,k=Math.min(w0,h0)*(R==2?.42:.3)/ext,cx=w0/2,cy=h0/2,
+Pp=q=>{const a=A0*Math.PI/180,e=E0*Math.PI/180,rx=q[0]*Math.cos(a)-q[1]*Math.sin(a),ry=q[0]*Math.sin(a)+q[1]*Math.cos(a);return[cx+k*rx,cy-k*(q[2]*Math.cos(e)+ry*Math.sin(e))]},st=nic(2*ext),O=Pp([0,0,0]);x.font='13px system-ui,sans-serif';
+for(let t=-Math.floor(ext/st)*st;t<=ext;t+=st){lnx(x,Pp([t,-ext,0]),Pp([t,ext,0]),gr);lnx(x,Pp([-ext,t,0]),Pp([ext,t,0]),gr);if(R==2&&Math.abs(t)>1e-9){x.fillStyle=mu;x.textAlign='center';x.fillText(g4(t),Pp([t,0,0])[0],O[1]+14);x.textAlign='right';x.fillText(g4(t),O[0]-6,Pp([0,t,0])[1]+4)}}
+[[ext,0,0,'x'],[0,ext,0,'y'],[0,0,ext,'z']].forEach(a=>{if(a[3]=='z'&&R==2)return;lnx(x,Pp([0,0,0]),Pp(a),mu,1.2);const q=Pp(a);x.fillStyle=mu;x.textAlign='left';x.fillText(a[3],q[0]+5,q[1]-5)});
+if(sq&&n==2){x.beginPath();[[0,0,0],cols[0],ad(cols[0],cols[1]),cols[1]].forEach((z,i)=>{const q=Pp(z);i?x.lineTo(q[0],q[1]):x.moveTo(q[0],q[1])});x.closePath();x.fillStyle='rgba(127,119,221,.15)';x.fill()}
+if(sq&&n==3){const[p,q2,r2]=cols,pq=ad(p,q2),pr=ad(p,r2),qr=ad(q2,r2),pqr=ad(pq,r2);[[[0,0,0],p],[[0,0,0],q2],[[0,0,0],r2],[p,pq],[p,pr],[q2,pq],[q2,qr],[r2,pr],[r2,qr],[pq,pqr],[pr,pqr],[qr,pqr]].forEach(e=>lnx(x,Pp(e[0]),Pp(e[1]),mu,1,[4,3]))}
+const AR=(z,c,lw)=>{const s=Pp([0,0,0]),t=Pp(z);lnx(x,s,t,c,lw);const g=Math.atan2(t[1]-s[1],t[0]-s[0]);x.beginPath();x.fillStyle=c;x.moveTo(t[0],t[1]);x.lineTo(t[0]-9*Math.cos(g-.4),t[1]-9*Math.sin(g-.4));x.lineTo(t[0]-9*Math.cos(g+.4),t[1]-9*Math.sin(g+.4));x.closePath();x.fill();return t};
+if(sol){let q=[0,0,0];cols.forEach((c,j)=>{const nx2=ad(q,c.map(t=>sol[j]*t));lnx(x,Pp(q),Pp(nx2),CL[j%6],2.5,[6,4]);q=nx2})}
+cols.forEach((c,j)=>{const t=AR(c,CL[j%6],2.5);x.fillStyle=CL[j%6];x.textAlign='left';x.fillText('a'+(SB[j]||''),t[0]+7,t[1]-7)});
+if(b){const t=AR(b,'#D85A30',3.5);x.fillStyle='#D85A30';x.textAlign='left';x.fillText('b',t[0]+7,t[1]-7)}
+x.fillStyle=fg;x.textAlign='left';const A=M.map(r=>r.slice(0,n));
+x.fillText(sq?'|det A| = '+g4(Math.abs(detf(A)))+(n==2?' — площадь параллелограмма':' — объём параллелепипеда'):sys?(sol?'b = '+sol.map((v,j)=>(j?(v<0?' − ':' + '):(v<0?'−':''))+fr(Math.abs(v))+'·a'+SB[j]).join(''):'Единственного решения нет: b не раскладывается однозначно'):'Столбцы матрицы — векторы',10,20);
+if(R==3){x.fillStyle=mu;x.fillText('Тяните, чтобы вращать',10,h0-10)}}
+const mcv=$('#mc');mcv.style.touchAction='none';let mdr=null;mcv.onpointerdown=e=>{mdr=[e.clientX,e.clientY];mcv.setPointerCapture(e.pointerId)};
+mcv.onpointermove=e=>{if(!mdr)return;mAz+=(e.clientX-mdr[0])*.4;mEl=Math.max(-90,Math.min(90,mEl+(e.clientY-mdr[1])*.4));mdr=[e.clientX,e.clientY];mdraw()};mcv.onpointerup=mcv.onpointercancel=()=>mdr=null;
+$('#mvm').addEventListener('input',mdraw);
+function mhead(M){const L='abcdef';return `<div style="margin-bottom:6px"><i>A</i> = ${mt(M.map((r,i)=>r.map((_,j)=>'<i>'+L[i]+'</i><sub>'+(j+1)+'</sub>')))} = ${mt(M)}</div>`}
+function expd(M){const n=M.length;if(n<2||n>5)return'';const L='abcdef',sy=(i,j)=>'<i>'+L[i]+'</i><sub>'+(j+1)+'</sub>',mn=(A,j)=>A.slice(1).map(r=>r.filter((_,c)=>c!=j)),S=M.map((r,i)=>r.map((_,j)=>sy(i,j))),sg=j=>j%2?' − ':' + ',cf=v=>v<0?'('+fr(v)+')':fr(v);
+let s1='<i>det A</i> = ',s2=s1,s3='= ',tot=0;
+for(let j=0;j<n;j++){const m=mn(M,j),ms=mn(S,j),d=n==2?m[0][0]:detf(m);s1+=(j?sg(j):'')+sy(0,j)+'·'+(n==2?ms[0][0]:mt(ms,1));s2+=(j?sg(j):'')+cf(M[0][j])+'·'+(n==2?cf(m[0][0]):mt(m,1));s3+=(j?sg(j):'')+cf(M[0][j])+'·'+cf(d);tot+=M[0][j]*d*(j%2?-1:1)}
+return `<div>Разложение по первой строке: det A = Σ (−1)<sup>j+1</sup>·a<sub>1j</sub>·M<sub>1j</sub></div><div>${s1}</div><div>${s2}</div><div>${s3} = <b>${fr(tot)}</b></div><div style="margin-bottom:8px"></div>`}
+function cls2(t,a){const ps=[4,8,12].map(k=>Math.pow(10,k));let vs=[];for(const sd of(isFinite(a)?[1,-1]:[a>0?1:-1])){vs=ps.map(P=>ev2(t,isFinite(a)?a+sd/P:sd*P));if(vs.every(v=>!isNaN(v)))break}if(vs.some(isNaN))return'?';const m=vs.map(Math.abs);if(m[2]<1e-3&&m[2]<=m[0]+1e-12)return'0';if(m[2]>20&&m[2]>m[1]&&m[1]>m[0]*1.01)return'∞';if(Math.abs(vs[2]-1)<1e-3)return'1';return'c'}
+$('#sim').innerHTML=$('#imt').innerHTML;$('#smo').innerHTML=$('#mop').innerHTML;$('#szo').innerHTML=$('#cop').innerHTML;
+FI.push('sf');$('#sf').closest('.f').insertAdjacentHTML('afterend','<div class="hint fm" id="fm_sf"></div>');
+const SH={lim:'Например x^sin(x) при x → 0. Бесконечность пишите inf или -inf. Вид неопределённости определяется сам.',der:'Любая f(x), порядок производной 1–3. Выводятся формулы и правила по шагам.',int:'f(x) и границы; границы можно писать как pi/2.',mat:'Строки через «;», числа через пробел. Для системы последний столбец — свободные члены b.',vec:'Координаты через пробел: два числа (плоскость) или три (пространство).',cx:'Число пишется как «вещественная мнимая»: 1 2 означает 1 + 2i.'};
+function stShow(){const t=$('#stp').value;document.querySelectorAll('#tabS [data-t]').forEach(e=>e.style.display=e.dataset.t.split(' ').includes(t)?'':'none');$('#shn').textContent=SH[t]}
+$('#stp').addEventListener('input',stShow);stShow();$('#g3').onclick=()=>tab(7);
+const nums=s=>s.trim().split(/[\s,;]+/).map(p).map(v=>isNaN(v)?0:v);
+$('#ssv').onclick=()=>{autoParams();const t=$('#stp').value,f=$('#sf').value;let html='',cvId='';
+if(t=='lim'){tab(3);$('#lfx').value=f;$('#la').value=$('#sa').value;$('#lp').value='';const w=$('#sm').value=='tay';if(tay!=w)$('#ltb').click();if(!w){$('#llt').value='lop';$('#llb').click()}ldraw();html=(w?$('#ltx').innerHTML:$('#llo').innerHTML)+'<h4>Таблица значений</h4>'+$('#lout').innerHTML;cvId='lc'}
+else if(t=='der'){tab(4);$('#dfx').value=f;$('#dor').value=$('#so').value;ddraw();html=$('#dsol').innerHTML+$('#dout').innerHTML;cvId='dc'}
+else if(t=='int'){tab(2);$('#ip').value='';$('#ifx').value=f;$('#ia').value=$('#si1').value;$('#ib').value=$('#si2').value;$('#imt').value=$('#sim').value;idraw();html=$('#iout').innerHTML;cvId='ic'}
+else if(t=='mat'){tab(6);const R=$('#smx').value.split(/;|\n/).map(r=>r.trim()).filter(Boolean).map(r=>r.split(/[\s,]+/)),C=Math.max(...R.map(r=>r.length));if(!R.length||R.length>6||C>6){tab(7);$('#sout').innerHTML='<div>Допустимо от 1 до 6 строк и столбцов.</div>';return}MM=R.map(r=>[...r,...Array(C-r.length).fill('0')]);$('#mrr').value=R.length;$('#mcc').value=C;mgrid();$('#mop').value=$('#smo').value;$('#mvm').value='auto';mdraw();html=$('#mout').innerHTML;cvId='mc'}
+else if(t=='vec'){tab(1);const u=nums($('#su1').value),v=nums($('#sv1').value),d=Math.max(u.length,v.length)>2?3:2;if(dim!=d)mode(d);vs.length=0;mk('u',[u[0]||0,u[1]||0,u[2]||0]);mk('v',[v[0]||0,v[1]||0,v[2]||0]);buildList();fit();html=$('#out').innerHTML;cvId='cv'}
+else{tab(5);const a=nums($('#sz1').value),b=nums($('#sz2').value);$('#c1a').value=a[0]||0;$('#c1b').value=a[1]||0;$('#c2a').value=b[0]||0;$('#c2b').value=b[1]||0;$('#cop').value=$('#szo').value;cdraw();html=$('#cout').innerHTML;cvId='cc'}
+const url=$('#'+cvId).toDataURL();tab(7);const im=$('#simg');im.src=url;im.style.display='block';$('#sout').innerHTML=html};
+const FNN={tan:'tg',asin:'arcsin',acos:'arccos',atan:'arctg',sinh:'sh',cosh:'ch',tanh:'th',log:'lg'};
+function sH(t,p=0){const w=(s,q)=>q<p?'('+s+')':s,a=t[1],b=t[2];switch(t[0]){case'n':return t[2]?`<i>${E(t[2])}</i>`:(t[1]<0&&p>0?'('+g4(t[1])+')':g4(t[1]));case'x':return'<i>x</i>';case'y':return'<i>y</i>';
+case'+':{const pb=b[0]=='neg'?b[1]:b[0]=='n'&&!b[2]&&b[1]<0?nn(-b[1]):b[0]=='*'&&b[1][0]=='n'&&!b[1][2]&&b[1][1]<0?mul(nn(-b[1][1]),b[2]):null;return pb?w(sH(a,1)+' − '+sH(pb,2),1):w(sH(a,1)+' + '+sH(b,1),1)}case'-':return w(sH(a,1)+' − '+sH(b,2),1);case'*':{if(a[0]=='n'&&!a[2]&&a[1]<0)return w('−'+(a[1]==-1?'':g4(-a[1])+'·')+sH(b,2),2);const sb=sH(b,2);return w(sH(a,2)+'·'+((b[0]=='neg'||(b[0]=='*'&&b[1][0]=='n'&&!b[1][2]&&b[1][1]<0))?'('+sb+')':sb),2)}
+case'/':{const s=`<span class="fr"><span>${sH(a,0)}</span><span>${sH(b,0)}</span></span>`;return p>3?'('+s+')':s}
+case'^':return w(sH(a,4)+'<sup>'+sH(b,0)+'</sup>',3);case'neg':return w('−'+sH(a,2.5),2);
+default:return a=='sqrt'?`<span class="sq">√<span class="ov">${sH(b,0)}</span></span>`:a=='abs'?'|'+sH(b,0)+'|':(FNN[a]||a)+'('+sH(b,0)+')'}}
+function sA(t,p=0){return sH(t,p)}
+const PF=['ifx','ia','ib','lfx','la','lgx','lh2','dfx','dx0','dx1','da','db','dgx','c1a','c1b','c2a','c2b','sf','sa','si1','si2','smx','su1','sv1','sz1','sz2'];
+function autoParams(){const src=[];PF.forEach(id=>{const e=$('#'+id);if(e)src.push(e.value)});MM.forEach(r=>r.forEach(s=>src.push(s)));vs.forEach(v=>v.ex&&v.ex.forEach(s=>src.push(s)));
+const fk=Object.keys(FN),found=new Set();src.forEach(s=>{(nz(String(s)).toLowerCase().match(/[a-z]+/g)||[]).forEach(t=>{if(RS.includes(t)||t=='inf')return;if(t.length>1&&fk.some(f=>f.startsWith(t)||t.startsWith(f)))return;(t.length>1?t.split(''):[t]).forEach(c=>{if(!RS.includes(c))found.add(c)})})});
+if($('#dim').checked||isImp($('#dfx').value))found.delete('y');const old=VL.map(r=>r.n).join(),keep=VL.filter(r=>found.has(r.n));found.forEach(n=>{if(!keep.some(r=>r.n==n))keep.push({n,v:1})});keep.sort((p,q)=>p.n<q.n?-1:1);
+if(keep.map(r=>r.n).join()!==old){VL=keep;vsync();vbuild();redraw();fmtAll()}}
+document.addEventListener('input',autoParams);document.addEventListener('change',autoParams);
+function grp(s,i){while(s[i]==' ')i++;if(s[i]=='{'){let d=0,j=i;for(;j<s.length;j++){if(s[j]=='{')d++;if(s[j]=='}'&&--d==0)break}return{t:s.slice(i+1,j),e:j+1}}return{t:s[i]||'',e:i+1}}
+function ltx(s){s=s.replace(/\\(left|right)|\\[,;! ]/g,'').replace(/\\[dt]?frac/g,'\\frac').replace(/\\(cdot|times)/g,'*').replace(/\\div/g,'/').replace(/\\pi/g,'pi').replace(/\\infty/g,'inf').replace(/\\(arcsin|arccos|arctan|arctg|sinh|cosh|tanh|sin|cos|tan|tg|ln|log|exp)/g,'$1');
+let c=0;while(s.includes('\\frac')&&c++<30){const i=s.indexOf('\\frac'),a=grp(s,i+5),b=grp(s,a.e);s=s.slice(0,i)+'(('+a.t+')/('+b.t+'))'+s.slice(b.e)}
+while(s.includes('\\sqrt')&&c++<60){const i=s.indexOf('\\sqrt');let j=i+5,n=null;if(s[j]=='['){const k=s.indexOf(']',j);n=s.slice(j+1,k);j=k+1}const a=grp(s,j);s=s.slice(0,i)+(n?'(('+a.t+')^(1/('+n+')))':'sqrt('+a.t+')')+s.slice(a.e)}
+return s.replace(/\^\{/g,'^(').replace(/[{]/g,'(').replace(/[}]/g,')').replace(/\\/g,'')}
+function frh(v){const s=fr(v),m=s.match(/^(−?)(\d+)\/(\d+)$/);return m?m[1]+'<span class="fr"><span>'+m[2]+'</span><span>'+m[3]+'</span></span>':s}
+let YV=false,YVAL=0,DXV=1,DYV=0;
+const NP=[['окружность x² + y² = 25','x^2+y^2=25','3','4','-6','6','-6','6'],['эллипс x²/4 + y² = 1','x^2/4+y^2=1','1.5','0.6','-3','3','-2','2'],['декартов лист x³ + y³ = 3xy','x^3+y^3=3*x*y','1.5','1.5','-3','3','-3','3'],['y² = x³ − x','y^2=x^3-x','2','2.4','-2','3','-4','4'],['eʸ + xy = e','exp(y)+x*y=e','0','1','-4','4','-3','4'],['x² + xy + y² = 7','x^2+x*y+y^2=7','2','1','-4','4','-4','4']];
+function ndraw(){const S0=csetup('#nc');if(!S0)return;const{x,w:w0,h:h0,mu,gr}=S0,o=$('#nout'),fm=$('#nfm'),parts=$('#dfx').value.split('=');
+YV=true;let A=null,B=null;if(parts.length<=2){A=par(parts[0]);B=parts.length>1?par(parts[1]):nn(0)}YV=false;
+if(!A||!B){fm.textContent='✗ Запишите уравнение вида «левая часть = правая часть» с переменными x и y, например x^2+y^2=25.';fm.style.color='#D85A30';o.innerHTML='';return}
+fm.style.color='';fm.innerHTML='<b style="color:var(--ac)">Вид в тексте</b><span class="rv">'+sA(A)+' = '+sA(B)+'</span>';
+const F=sub(A,B),pt2=(T,a,b)=>{DXV=a;DYV=b;const r=D(T);DXV=1;DYV=0;return r},Fx=pt2(F,1,0),Fy=pt2(F,0,1),Fxx=pt2(Fx,1,0),Fxy=pt2(Fx,0,1),Fyy=pt2(Fy,0,1),ev=(T,a,b)=>{YVAL=b;return ev2(T,a)},dd=(n,d)=>`<span class="fr"><span>${n}</span><span>${d}</span></span>`;
+const xa=pv($('#nxa').value),xb=pv($('#nxb').value),ya=pv($('#nya').value),yb=pv($('#nyb').value);if([xa,xb,ya,yb].some(isNaN)||xa>=xb||ya>=yb){o.innerHTML='<div>Проверьте границы окна.</div>';return}
+ const X=u=>44+(u-xa)/(xb-xa)*(w0-56),Y=v=>h0-26-(v-ya)/(yb-ya)*(h0-38),P2=p=>[X(p[0]),Y(p[1])];
+let st=nic(xb-xa);x.fillStyle=mu;x.textAlign='center';for(let u=Math.ceil(xa/st)*st;u<=xb+1e-9;u+=st){lnx(x,[X(u),12],[X(u),h0-26],gr);x.fillText(g4(u),X(u),h0-9)}
+st=nic(yb-ya);x.textAlign='right';for(let u=Math.ceil(ya/st)*st;u<=yb+1e-9;u+=st){lnx(x,[44,Y(u)],[w0-12,Y(u)],gr);x.fillText(g4(u),38,Y(u)+4)}
+if(ya<0&&yb>0)lnx(x,[44,Y(0)],[w0-12,Y(0)],mu,1.4);if(xa<0&&xb>0)lnx(x,[X(0),12],[X(0),h0-26],mu,1.4);
+const N=120,V=[];for(let j=0;j<=N;j++){V.push([]);for(let i=0;i<=N;i++)V[j].push(ev(F,xa+(xb-xa)*i/N,ya+(yb-ya)*j/N))}
+const ip=(a,b,p,q)=>{const t=a/(a-b);return[p[0]+(q[0]-p[0])*t,p[1]+(q[1]-p[1])*t]};x.strokeStyle='#7F77DD';x.lineWidth=2.2;x.beginPath();
+for(let j=0;j<N;j++)for(let i=0;i<N;i++){const x0=xa+(xb-xa)*i/N,x1=xa+(xb-xa)*(i+1)/N,y0=ya+(yb-ya)*j/N,y1=ya+(yb-ya)*(j+1)/N,c=[V[j][i],V[j][i+1],V[j+1][i+1],V[j+1][i]],q=[[x0,y0],[x1,y0],[x1,y1],[x0,y1]],pts=[];
+for(let e=0;e<4;e++){const a=c[e],b=c[(e+1)%4];if(isFinite(a)&&isFinite(b)&&a*b<0)pts.push(P2(ip(a,b,q[e],q[(e+1)%4])))}
+if(pts.length==2||pts.length==4)for(let m=0;m<pts.length;m+=2){x.moveTo(pts[m][0],pts[m][1]);x.lineTo(pts[m+1][0],pts[m+1][1])}}x.stroke();
+let px=pv($('#nx0').value),py=pv($('#ny0').value);const px0=px,py0=py;for(let it=0;it<60&&isFinite(px+py);it++){const f=ev(F,px,py),a=ev(Fx,px,py),b=ev(Fy,px,py),n2=a*a+b*b;if(!n2||!isFinite(f))break;px-=f*a/n2;py-=f*b/n2}
+const on=isFinite(px+py)&&Math.abs(ev(F,px,py))<1e-8,fxv=on?ev(Fx,px,py):0,fyv=on?ev(Fy,px,py):0;
+let h=`<div><b>1.</b> Переносим всё в одну часть: F(x, y) = ${sA(F)} = 0</div><div><b>2.</b> Полный дифференциал: dF = F<sub>x</sub> dx + F<sub>y</sub> dy = 0</div>`+
+`<div><b>3.</b> F<sub>x</sub> = ∂F/∂x (y — константа) = ${sA(Fx)}</div><div>F<sub>y</sub> = ∂F/∂y (x — константа) = ${sA(Fy)}</div>`+
+`<div><b>4.</b> Из F<sub>x</sub> dx + F<sub>y</sub> dy = 0 выражаем ${dd('dy','dx')} = −${dd('F<sub>x</sub>','F<sub>y</sub>')} = ${sA(neg(div(Fx,Fy)))}</div>`;
+if(!on)h+='<div>Точка не лежит на кривой, ближайшую найти не удалось — поменяйте x₀, y₀.</div>';
+else{const mv=Math.hypot(px-px0,py-py0)>1e-6;h+=`<div><b>5.</b> Точка ${mv?'(притянута к кривой) ':''}P = (${g4(px)}; ${g4(py)}), F<sub>x</sub>(P) = ${g4(fxv)}, F<sub>y</sub>(P) = ${g4(fyv)}</div>`;
+if(Math.abs(fyv)<1e-9)h+=`<div>F<sub>y</sub> = 0: касательная вертикальная, x = ${g4(px)}</div>`;
+else{const k=-fxv/fyv,y2=-(ev(Fxx,px,py)+2*ev(Fxy,px,py)*k+ev(Fyy,px,py)*k*k)/fyv;h+=`<div>${dd('dy','dx')}(P) = −${dd(g4(fxv),g4(fyv))} = <b>${g4(k)}</b></div><div>Касательная: y − ${g4(py)} = ${g4(k)}·(x − ${g4(px)})</div>`+
+`<div>Вторая производная: ${dd('d²y','dx²')} = −${dd('F<sub>xx</sub> + 2F<sub>xy</sub>y′ + F<sub>yy</sub>(y′)²','F<sub>y</sub>')} = <b>${g4(y2)}</b></div>`}
+h+=`<div>Векторы: нормаль n = ∇F = (${g4(fxv)}; ${g4(fyv)}), направление касательной s = (${g4(fyv)}; ${g4(-fxv)}), ⟨n, s⟩ = ${g4(fxv)}·${g4(fyv)} + ${g4(fyv)}·(${g4(-fxv)}) = 0</div>`;
+const c=P2([px,py]);if(Math.abs(fyv)>1e-9){const k=-fxv/fyv;lnx(x,P2([xa,py+k*(xa-px)]),P2([xb,py+k*(xb-px)]),'#BA7517',1.8)}else lnx(x,[c[0],12],[c[0],h0-26],'#BA7517',1.8);
+const gl=Math.hypot(fxv,fyv)||1,sc=.14*Math.min(xb-xa,yb-ya)/gl,tp=P2([px+fxv*sc,py+fyv*sc]);lnx(x,c,tp,'#1D9E75',2.5);const ga=Math.atan2(tp[1]-c[1],tp[0]-c[0]);x.beginPath();x.fillStyle='#1D9E75';x.moveTo(tp[0],tp[1]);x.lineTo(tp[0]-9*Math.cos(ga-.4),tp[1]-9*Math.sin(ga-.4));x.lineTo(tp[0]-9*Math.cos(ga+.4),tp[1]-9*Math.sin(ga+.4));x.closePath();x.fill();
+x.beginPath();x.fillStyle='#D85A30';x.arc(c[0],c[1],5,0,7);x.fill()}
+o.innerHTML=h}
+$('#np').innerHTML=NP.map((p,i)=>`<option value="${i}">${p[0]}</option>`).join('');
+function setN(i){const p=NP[i];$('#dfx').value=p[1];['nx0','ny0','nxa','nxb','nya','nyb'].forEach((id,j)=>$('#'+id).value=p[j+2])}
+$('#np').onchange=()=>{setN(+$('#np').value);ddraw()};['nq','nx0','ny0','nxa','nxb','nya','nyb'].forEach(i=>$('#'+i).addEventListener('input',ndraw));
+$('#t7').onclick=()=>tab(8);new ResizeObserver(()=>ndraw()).observe($('#nc').parentElement);
+const isImp=s=>/=/.test(s)||(nz(String(s)).toLowerCase().match(/[a-z]+/g)||[]).includes('y');
+function impMode(){const imp=$('#dim').checked||isImp($('#dfx').value);document.querySelectorAll('#tabD .xp').forEach(e=>e.style.display=imp?'none':'');document.querySelectorAll('#tabD .nimp').forEach(e=>e.style.display=imp?'':'none');$('#dc').parentElement.style.display=imp?'none':'';return imp}
+(function(){const dl=$('#tabD .left'),dr=$('#tabD .right'),nl=$('#tabN .left'),nr=$('#tabN .right');[...dr.children].forEach(s=>s.classList.add('xp'));dr.firstElementChild.classList.remove('xp');
+const ncw=nl.querySelector('.cvw'),hn=nl.querySelector('.hint');ncw.classList.add('nimp');hn.classList.add('nimp');$('#dc').parentElement.after(ncw);ncw.after(hn);[...nr.children].forEach(s=>{s.classList.add('nimp');dr.appendChild(s)});document.querySelectorAll('#tabD .nimp').forEach(e=>e.style.display='none');$('#tabN').remove();
+NP[0].slice(2).forEach((v,j)=>$('#'+['nx0','ny0','nxa','nxb','nya','nyb'][j]).value=v)})();
+$('#dim').addEventListener('input',ddraw);$('#dlg').addEventListener('input',ddraw);
+const lgHas=t=>t[0]=='^'&&hx(t[2])||(t[0]!='n'&&t.slice(1).some(c=>Array.isArray(c)&&lgHas(c)));
+function lgT(t){if(t[0]=='n'||t[0]=='x'||t[0]=='y')return t;if(t[0]=='^'&&hx(t[2]))return['f','exp',mul(lgT(t[2]),['f','ln',lgT(t[1])])];if(t[0]=='f')return['f',t[1],lgT(t[2])];if(t[0]=='neg')return['neg',lgT(t[1])];return[t[0],lgT(t[1]),lgT(t[2])]}
+function lgNode(t,o){if(t[0]=='^'&&hx(t[2]))o.push(t);if(t[0]!='n')t.slice(1).forEach(c=>Array.isArray(c)&&lgNode(c,o));return o}
+function lgNote(t){return '<div><b>Логарифмирование:</b></div>'+lgNode(t,[]).map(n=>`<div>${sA(n)} = (e<sup>ln ${sA(n[1],4)}</sup>)<sup>${sA(n[2])}</sup> = e<sup>${sA(n[2],3)}·ln ${sA(n[1],4)}</sup></div>`).join('')+'<div>Дальше дифференцируем показательную функцию как сложную.</div><div style="margin-bottom:8px"></div>'}
+mk('a',[3,1,2]);mk('b',[1,3,-1]);buildList();mode(3);
+
+(function(){
+const tg=window.Telegram&&Telegram.WebApp;if(!tg||tg.platform==='unknown')return;
+tg.ready();tg.expand();
+try{tg.disableVerticalSwipes()}catch(e){}
+function theme(){
+  document.documentElement.setAttribute('data-theme',tg.colorScheme==='dark'?'dark':'light');
+  const bg=getComputedStyle(document.documentElement).getPropertyValue('--bg').trim();
+  try{tg.setHeaderColor(bg);tg.setBackgroundColor(bg);tg.setBottomBarColor(bg)}catch(e){}
+  try{draw();idraw()}catch(e){}
+}
+theme();tg.onEvent('themeChanged',theme);
+tg.onEvent('viewportChanged',()=>{try{draw();idraw()}catch(e){}});
+})();
+</script></body></html>
